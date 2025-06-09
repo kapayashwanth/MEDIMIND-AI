@@ -1,3 +1,4 @@
+
 'use server';
 
 import { interpretPrescription, InterpretPrescriptionInput, InterpretPrescriptionOutput } from '@/ai/flows/interpret-prescription';
@@ -28,6 +29,7 @@ export async function interpretPrescriptionAction(
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Invalid input.',
+      data: null,
     };
   }
 
@@ -46,6 +48,7 @@ export async function interpretPrescriptionAction(
       return {
         message: 'AI analysis returned incomplete data. Please try again.',
         errors: { server: ['AI analysis returned incomplete data.'] },
+        data: null,
       };
     }
   } catch (error) {
@@ -54,6 +57,7 @@ export async function interpretPrescriptionAction(
     return {
       message: `Server error: ${errorMessage}`,
       errors: { server: [errorMessage] },
+      data: null,
     };
   }
 }

@@ -38,6 +38,7 @@ export async function analyzeReportAction(
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Invalid input.',
+      data: null,
     };
   }
 
@@ -50,7 +51,6 @@ export async function analyzeReportAction(
 
   try {
     const result = await analyzeMedicalReport(input);
-    // Add more robust checking based on the new, more complex schema
     if (result && result.overallRiskAssessment && result.conciseSummary && result.personalizedRecommendations) {
       return {
         message: 'Report analyzed successfully.',
@@ -60,6 +60,7 @@ export async function analyzeReportAction(
       return {
         message: 'AI analysis returned incomplete data. Please ensure all key fields were processed.',
         errors: { server: ['AI analysis returned incomplete data.'] },
+        data: null,
       };
     }
   } catch (error) {
@@ -68,6 +69,7 @@ export async function analyzeReportAction(
     return {
       message: `Server error: ${errorMessage}`,
       errors: { server: [errorMessage] },
+      data: null,
     };
   }
 }
