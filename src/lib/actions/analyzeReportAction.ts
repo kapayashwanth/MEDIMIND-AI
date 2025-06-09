@@ -6,6 +6,8 @@ import { z } from 'zod';
 const FormSchema = z.object({
   reportDataUri: z.string().min(1, "Report file is required."),
   patientInformation: z.string().min(1, "Patient information is required."),
+  age: z.string().optional(), // Age is optional
+  gender: z.string().optional(), // Gender is optional
 });
 
 export type AnalyzeReportState = {
@@ -13,6 +15,8 @@ export type AnalyzeReportState = {
   errors?: {
     reportDataUri?: string[];
     patientInformation?: string[];
+    age?: string[];
+    gender?: string[];
     server?: string[];
   };
   data?: AnalyzeMedicalReportOutput | null;
@@ -25,6 +29,8 @@ export async function analyzeReportAction(
   const validatedFields = FormSchema.safeParse({
     reportDataUri: formData.get('reportDataUri'),
     patientInformation: formData.get('patientInformation'),
+    age: formData.get('age'),
+    gender: formData.get('gender'),
   });
 
   if (!validatedFields.success) {
@@ -37,11 +43,13 @@ export async function analyzeReportAction(
   const input: AnalyzeMedicalReportInput = {
     reportDataUri: validatedFields.data.reportDataUri,
     patientInformation: validatedFields.data.patientInformation,
+    age: validatedFields.data.age,
+    gender: validatedFields.data.gender,
   };
 
   try {
     const result = await analyzeMedicalReport(input);
-    if (result && result.keyFindings && result.summary) {
+    if (result && result.keyFindings && result.summary && result.riskAssessment && result.personalizedRecommendations) {
       return {
         message: 'Report analyzed successfully.',
         data: result,

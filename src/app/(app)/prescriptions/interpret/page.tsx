@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, ChangeEvent, useActionState } from 'react';
+import { useState, ChangeEvent, useActionState, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +12,10 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { interpretPrescriptionAction, InterpretPrescriptionState } from '@/lib/actions/interpretPrescriptionAction';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { FileUp, AlertCircle, CheckCircle2, Pill, Clock, Target, Info } from 'lucide-react';
+import { FileUp, AlertCircle, CheckCircle2, Pill, Clock, Target, Info, Download } from 'lucide-react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+
 
 const initialState: InterpretPrescriptionState = {
   message: null,
@@ -34,6 +37,7 @@ export default function InterpretPrescriptionPage() {
   const [prescriptionFile, setPrescriptionFile] = useState<File | null>(null);
   const [prescriptionDataUri, setPrescriptionDataUri] = useState<string>('');
   const [fileName, setFileName] = useState<string>('');
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -51,6 +55,26 @@ export default function InterpretPrescriptionPage() {
       setPrescriptionFile(null);
       setPrescriptionDataUri('');
       setFileName('');
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    const input = resultsRef.current;
+    if (input) {
+      try {
+        const canvas = await html2canvas(input, { scale: 2 });
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'px',
+          format: [canvas.width, canvas.height]
+        });
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+        pdf.save('MediMind_AI_Prescription_Summary.pdf');
+      } catch (error) {
+        console.error("Error generating PDF:", error);
+        // Add a user-friendly error message here, e.g., using a toast
+      }
     }
   };
 
@@ -102,9 +126,15 @@ export default function InterpretPrescriptionPage() {
         </Card>
 
         {state.data && state.data.medications && (
-          <Card className="max-w-2xl mx-auto mt-8 shadow-xl">
+          <Card className="max-w-2xl mx-auto mt-8 shadow-xl" ref={resultsRef}>
             <CardHeader>
-              <CardTitle className="font-headline text-2xl">Prescription Details</CardTitle>
+              <div className="flex justify-between items-center">
+                <CardTitle className="font-headline text-2xl">Prescription Details</CardTitle>
+                <Button variant="outline" size="sm" onClick={handleDownloadPdf}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Download PDF
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {state.data.medications.length > 0 ? (
