@@ -141,7 +141,7 @@ export default function ReportAnalysisPage() {
                       <SelectItem value="Male">Male</SelectItem>
                       <SelectItem value="Female">Female</SelectItem>
                       <SelectItem value="Other">Other</SelectItem>
-                      <SelectItem value="">Prefer not to say</SelectItem>
+                      <SelectItem value="unspecified">Prefer not to say</SelectItem>
                     </SelectContent>
                   </Select>
                    {state.errors?.gender && (
@@ -225,4 +225,3 @@ export default function ReportAnalysisPage() {
     </>
   );
 }
-
