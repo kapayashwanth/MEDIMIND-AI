@@ -1,5 +1,5 @@
 export interface Medicine {
-  id: string;
+  id?: string; // Made optional as AI won't provide a stable ID
   name: string;
   description: string;
   usage: string;

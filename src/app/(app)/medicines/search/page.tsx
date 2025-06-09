@@ -1,63 +1,107 @@
 'use client';
 
-import { useState, useEffect, ChangeEvent } from 'react';
+import { ChangeEvent, useActionState, useRef } from 'react';
+import { useFormStatus } from 'react-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { MedicineInfoCard } from '@/components/cards/MedicineInfoCard';
-import { medicines as allMedicines } from '@/lib/data/medicines';
+import { searchMedicineAction, SearchMedicineState } from '@/lib/actions/searchMedicineAction';
 import type { Medicine } from '@/types';
-import { Search, Frown } from 'lucide-react';
+import { Search, Frown, AlertCircle, Info } from 'lucide-react';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
+const initialState: SearchMedicineState = {
+  message: null,
+  errors: {},
+  data: null,
+};
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" disabled={pending} className="w-full sm:w-auto">
+      {pending ? <LoadingSpinner size="sm" /> : <><Search className="mr-2 h-4 w-4" /> Search</>}
+    </Button>
+  );
+}
 
 export default function MedicineSearchPage() {
+  const [state, formAction] = useActionState(searchMedicineAction, initialState);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredMedicines, setFilteredMedicines] = useState<Medicine[]>(allMedicines);
+  const formRef = useRef<HTMLFormElement>(null);
 
-  useEffect(() => {
-    if (searchTerm.trim() === '') {
-      setFilteredMedicines(allMedicines);
-    } else {
-      const lowercasedFilter = searchTerm.toLowerCase();
-      const filtered = allMedicines.filter(medicine =>
-        medicine.name.toLowerCase().includes(lowercasedFilter) ||
-        medicine.description.toLowerCase().includes(lowercasedFilter)
-      );
-      setFilteredMedicines(filtered);
-    }
-  }, [searchTerm]);
-
-  const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleSearchTermChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
+  
+  // Prepare data for the MedicineInfoCard. 
+  // If AI returns data, use it. Otherwise, card won't be rendered.
+  const medicineData = state.data;
 
   return (
     <>
-      <PageHeader title="Medicine Search" />
+      <PageHeader title="AI Medicine Search" />
       <main className="flex-1 p-6">
-        <div className="mb-8 max-w-xl mx-auto">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search for medicines by name or description..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-              className="w-full pl-10 py-3 text-base rounded-lg shadow-sm"
-            />
-          </div>
-        </div>
+        <Card className="max-w-xl mx-auto mb-8 shadow-lg">
+          <CardHeader>
+            <CardTitle className="font-headline text-2xl">Search for Medicine</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form
+              ref={formRef}
+              action={(formData) => {
+                formAction(formData);
+              }}
+              className="space-y-4"
+            >
+              <div className="relative flex flex-col sm:flex-row gap-2 items-center">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground sm:hidden" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground hidden sm:block pointer-events-none" />
+                <Input
+                  type="search"
+                  name="searchTerm"
+                  placeholder="Enter medicine name..."
+                  value={searchTerm}
+                  onChange={handleSearchTermChange}
+                  className="w-full pl-10 py-3 text-base rounded-lg shadow-sm flex-grow"
+                  aria-label="Medicine search term"
+                />
+                <input type="hidden" name="searchTerm" value={searchTerm} />
+                <SubmitButton />
+              </div>
+              {state.errors?.searchTerm && (
+                <p className="text-sm font-medium text-destructive">{state.errors.searchTerm[0]}</p>
+              )}
+            </form>
+          </CardContent>
+        </Card>
 
-        {filteredMedicines.length > 0 ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredMedicines.map(medicine => (
-              <MedicineInfoCard key={medicine.id} medicine={medicine} />
-            ))}
+        {/* Display messages or errors */}
+        {state.message && !state.data && (
+           <Alert variant={state.errors?.server ? "destructive" : "default"} className="max-w-xl mx-auto mb-8">
+             {state.errors?.server ? <AlertCircle className="h-4 w-4" /> : <Info className="h-4 w-4" />}
+             <AlertTitle>{state.errors?.server ? 'Error' : 'Notification'}</AlertTitle>
+             <AlertDescription>{state.message}</AlertDescription>
+           </Alert>
+        )}
+        
+        {/* Display MedicineInfoCard if data exists */}
+        {medicineData && (
+          <div className="max-w-xl mx-auto">
+            <MedicineInfoCard medicine={medicineData} />
           </div>
-        ) : (
-          <div className="text-center py-10">
-            <Frown className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <p className="text-xl text-muted-foreground">No medicines found matching your search.</p>
-            <p className="text-sm text-muted-foreground">Try a different search term or browse all medicines.</p>
-          </div>
+        )}
+
+        {/* Show if no data and no specific "not found" message, implies initial state or non-specific error */}
+        {!medicineData && !state.message && !state.errors?.searchTerm && (
+             <div className="text-center py-10">
+                <Search className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <p className="text-xl text-muted-foreground">Search for medicine information.</p>
+                <p className="text-sm text-muted-foreground">Enter a medicine name above to begin.</p>
+            </div>
         )}
       </main>
     </>
