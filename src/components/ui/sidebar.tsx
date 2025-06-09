@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -543,18 +544,28 @@ const SidebarMenuButton = React.forwardRef<
 >(
   (
     {
-      asChild = false,
+      asChild: renderAsSlot = false, // Renamed for clarity: whether this component itself should be a Slot
       isActive = false,
       variant = "default",
       size = "default",
       tooltip,
       className,
-      ...props
+      children,
+      ...restProps // All other props passed by the caller (e.g., from Link)
     },
     ref
   ) => {
-    const Comp = asChild ? Slot : "button"
+    const Comp = renderAsSlot ? Slot : "button"
     const { isMobile, state } = useSidebar()
+
+    // If Comp is going to be a native "button", we must ensure that any `asChild` prop
+    // received from a parent (like Link asChild) in `restProps` is not spread onto it.
+    // If Comp is Slot, Slot itself knows how to handle an `asChild` prop from `restProps`.
+    let finalPropsToSpread = restProps
+    if (Comp === "button" && typeof restProps.asChild !== 'undefined') {
+      const { asChild: _asChildFromRest, ...buttonSpecificProps } = restProps
+      finalPropsToSpread = buttonSpecificProps
+    }
 
     const button = (
       <Comp
@@ -563,29 +574,32 @@ const SidebarMenuButton = React.forwardRef<
         data-size={size}
         data-active={isActive}
         className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
-        {...props}
-      />
+        {...finalPropsToSpread} // Spread the potentially cleaned props
+      >
+        {children}
+      </Comp>
     )
 
     if (!tooltip) {
       return button
     }
 
+    let tooltipContentPropsInternal: React.ComponentProps<typeof TooltipContent> = {
+      side: "right",
+      align: "center",
+      hidden: state !== "collapsed" || isMobile,
+    }
+
     if (typeof tooltip === "string") {
-      tooltip = {
-        children: tooltip,
-      }
+      tooltipContentPropsInternal.children = tooltip
+    } else {
+      tooltipContentPropsInternal = { ...tooltipContentPropsInternal, ...tooltip }
     }
 
     return (
       <Tooltip>
         <TooltipTrigger asChild>{button}</TooltipTrigger>
-        <TooltipContent
-          side="right"
-          align="center"
-          hidden={state !== "collapsed" || isMobile}
-          {...tooltip}
-        />
+        <TooltipContent {...tooltipContentPropsInternal} />
       </Tooltip>
     )
   }
