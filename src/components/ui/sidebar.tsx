@@ -544,25 +544,30 @@ const SidebarMenuButton = React.forwardRef<
 >(
   (
     {
-      asChild: renderAsSlot = false, 
+      asChild: renderAsSlot = false,
       isActive = false,
       variant = "default",
       size = "default",
       tooltip,
       className,
       children,
-      ...restProps 
+      ...restProps
     },
     ref
   ) => {
     const { isMobile, state } = useSidebar();
     const Comp = renderAsSlot ? Slot : "button";
 
-    const propsForComp = { ...restProps };
-    // If Comp is a DOM element (not Slot) and 'asChild' is in propsForComp (e.g., from a parent <Link asChild>),
-    // then remove it because DOM elements don't understand 'asChild'.
-    if (Comp !== Slot && typeof propsForComp.asChild !== 'undefined') {
-      delete propsForComp.asChild;
+    const { asChild: parentAsChild, ...otherParentProps } = restProps;
+    let finalPropsForElement;
+
+    if (Comp === Slot) {
+      // If SidebarMenuButton itself is a Slot, pass all parent props, including parent's asChild
+      finalPropsForElement = restProps;
+    } else {
+      // If SidebarMenuButton is rendering a DOM element (e.g. "button"),
+      // only pass otherParentProps, effectively stripping parentAsChild.
+      finalPropsForElement = otherParentProps;
     }
 
     const buttonElement = (
@@ -572,7 +577,7 @@ const SidebarMenuButton = React.forwardRef<
         data-size={size}
         data-active={isActive}
         className={cn(sidebarMenuButtonVariants({ variant, size, className }))}
-        {...propsForComp} 
+        {...finalPropsForElement}
       >
         {children}
       </Comp>
