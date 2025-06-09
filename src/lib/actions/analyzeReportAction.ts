@@ -6,7 +6,7 @@ import { z } from 'zod';
 
 const FormSchema = z.object({
   reportDataUri: z.string().min(1, "Report file is required."),
-  patientInformation: z.string().optional(), // Now optional
+  patientInformation: z.string().optional(),
   age: z.string().optional(),
   gender: z.string().optional(),
 });
@@ -45,19 +45,20 @@ export async function analyzeReportAction(
     reportDataUri: validatedFields.data.reportDataUri,
     patientInformation: validatedFields.data.patientInformation,
     age: validatedFields.data.age,
-    gender: validatedFields.data.gender,
+    gender: validatedFields.data.gender === 'unspecified' ? undefined : validatedFields.data.gender,
   };
 
   try {
     const result = await analyzeMedicalReport(input);
-    if (result && result.keyFindings && result.summary && result.riskAssessment && result.personalizedRecommendations) {
+    // Add more robust checking based on the new, more complex schema
+    if (result && result.overallRiskAssessment && result.conciseSummary && result.personalizedRecommendations) {
       return {
         message: 'Report analyzed successfully.',
         data: result,
       };
     } else {
       return {
-        message: 'AI analysis returned incomplete data. Please try again.',
+        message: 'AI analysis returned incomplete data. Please ensure all key fields were processed.',
         errors: { server: ['AI analysis returned incomplete data.'] },
       };
     }
@@ -70,4 +71,3 @@ export async function analyzeReportAction(
     };
   }
 }
-

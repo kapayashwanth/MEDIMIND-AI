@@ -11,12 +11,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { analyzeReportAction, AnalyzeReportState } from '@/lib/actions/analyzeReportAction';
+import type { TestResultItem } from '@/ai/flows/analyze-medical-report';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { FileUp, AlertCircle, CheckCircle2, Download, User, Users, FileScan as ReportIcon } from 'lucide-react'; // Renamed FileScan to ReportIcon to avoid conflict
+import { 
+    FileUp, AlertCircle, CheckCircle2, Download, User, Users, FileText as ReportIcon,
+    AlertOctagon, Activity, Info, ListChecks, ArrowDownCircle, ArrowUpCircle, CheckCircle
+} from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 
 const initialState: AnalyzeReportState = {
   message: null,
@@ -63,7 +68,7 @@ export default function ReportAnalysisPage() {
     const input = resultsRef.current;
     if (input) {
       try {
-        const canvas = await html2canvas(input, { scale: 2 });
+        const canvas = await html2canvas(input, { scale: 2, useCORS: true });
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF({
           orientation: 'portrait',
@@ -79,7 +84,7 @@ export default function ReportAnalysisPage() {
     }
   };
   
-  const getRiskAssessmentClass = (risk?: string) => {
+  const getOverallRiskAssessmentClass = (risk?: string) => {
     if (!risk) return 'border-muted text-muted-foreground';
     const lowerRisk = risk.toLowerCase();
     if (lowerRisk.includes('danger')) return 'border-destructive bg-destructive/10 text-destructive';
@@ -88,16 +93,52 @@ export default function ReportAnalysisPage() {
     return 'border-muted text-muted-foreground';
   };
 
+  const getStatusBadgeVariant = (status?: TestResultItem['status']): "default" | "destructive" | "secondary" | "outline" => {
+    if (!status) return "outline";
+    switch (status.toLowerCase()) {
+      case 'normal':
+        return "default"; 
+      case 'watch':
+        return "secondary"; 
+      case 'danger':
+      case 'low': 
+      case 'high':
+        return "destructive";
+      case 'info':
+      default:
+        return "outline";
+    }
+  };
+  
+ const getStatusColorAndIcon = (status?: TestResultItem['status']): { colorClass: string; IconComponent: React.ElementType } => {
+    if (!status) return { colorClass: 'text-muted-foreground', IconComponent: Info };
+    switch (status.toLowerCase()) {
+      case 'normal':
+        return { colorClass: 'text-green-500 dark:text-green-400', IconComponent: CheckCircle };
+      case 'watch':
+        return { colorClass: 'text-yellow-500 dark:text-yellow-400', IconComponent: Activity };
+      case 'danger':
+        return { colorClass: 'text-red-600 dark:text-red-500', IconComponent: AlertOctagon };
+      case 'low':
+         return { colorClass: 'text-red-600 dark:text-red-500', IconComponent: ArrowDownCircle };
+      case 'high':
+        return { colorClass: 'text-red-600 dark:text-red-500', IconComponent: ArrowUpCircle };
+      case 'info':
+      default:
+        return { colorClass: 'text-blue-500 dark:text-blue-400', IconComponent: Info };
+    }
+  };
+
 
   return (
     <>
       <PageHeader title="Analyze Medical Report" />
       <main className="flex-1 p-6">
-        <Card className="max-w-2xl mx-auto shadow-xl">
+        <Card className="max-w-3xl mx-auto shadow-xl">
           <CardHeader>
             <CardTitle className="font-headline text-2xl">Upload Report</CardTitle>
             <CardDescription>
-              Upload an X-ray, MRI, lab results, or other medical test report for AI analysis. Age, gender, and other information are optional but can improve results.
+              Upload an X-ray, MRI, lab results, or other medical test report for AI analysis. Age and gender are optional but can improve results.
             </CardDescription>
           </CardHeader>
           <form action={formAction}>
@@ -133,7 +174,7 @@ export default function ReportAnalysisPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="gender">Patient Gender (Optional)</Label>
-                  <Select name="gender" defaultValue="">
+                  <Select name="gender" defaultValue="unspecified">
                     <SelectTrigger className="w-full bg-background">
                       <SelectValue placeholder="Select gender" />
                     </SelectTrigger>
@@ -167,9 +208,9 @@ export default function ReportAnalysisPage() {
             <CardFooter className="flex flex-col gap-4">
               <SubmitButton />
               {state.message && !state.data && (
-                <Alert variant={state.errors || state.message.startsWith('Server error:') ? "destructive" : "default"} className="w-full">
-                  {state.errors || state.message.startsWith('Server error:') ? <AlertCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
-                  <AlertTitle>{state.errors || state.message.startsWith('Server error:') ? 'Error' : 'Status'}</AlertTitle>
+                <Alert variant={state.errors || state.message?.startsWith('Server error:') ? "destructive" : "default"} className="w-full">
+                  {state.errors || state.message?.startsWith('Server error:') ? <AlertCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+                  <AlertTitle>{state.errors || state.message?.startsWith('Server error:') ? 'Error' : 'Status'}</AlertTitle>
                   <AlertDescription>{state.message}</AlertDescription>
                 </Alert>
               )}
@@ -178,7 +219,7 @@ export default function ReportAnalysisPage() {
         </Card>
 
         {state.data && (
-          <Card className="max-w-2xl mx-auto mt-8 shadow-xl" ref={resultsRef}>
+          <Card className="max-w-3xl mx-auto mt-8 shadow-xl" ref={resultsRef}>
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle className="font-headline text-2xl">Analysis Results</CardTitle>
@@ -187,33 +228,65 @@ export default function ReportAnalysisPage() {
                   Download PDF
                 </Button>
               </div>
+               <p className="text-sm text-muted-foreground pt-2">{state.data.conciseSummary}</p>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
                 <h3 className="font-semibold text-lg mb-2 flex items-center">
-                  <AlertCircle className="mr-2 h-5 w-5 text-primary" /> Risk Assessment
+                  <AlertCircle className="mr-2 h-5 w-5 text-primary" /> Overall Risk Assessment
                 </h3>
-                <div className={`p-3 border rounded-md text-sm whitespace-pre-wrap ${getRiskAssessmentClass(state.data.riskAssessment)}`}>
-                  {state.data.riskAssessment}
+                <div className={`p-3 border rounded-md text-sm whitespace-pre-wrap ${getOverallRiskAssessmentClass(state.data.overallRiskAssessment)}`}>
+                  {state.data.overallRiskAssessment}
                 </div>
               </div>
+
+             {state.data.detailedTestResults && state.data.detailedTestResults.length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-lg mb-3 flex items-center">
+                    <ListChecks className="mr-2 h-5 w-5 text-primary" /> Detailed Test Results
+                  </h3>
+                  <div className="space-y-4">
+                    {state.data.detailedTestResults.map((item, index) => {
+                      const { colorClass, IconComponent } = getStatusColorAndIcon(item.status);
+                      return (
+                        <div key={index} className="p-3 bg-muted/50 rounded-md border">
+                          <div className="flex justify-between items-start mb-1">
+                            <h4 className="font-medium text-foreground">{item.testName}</h4>
+                            <Badge variant={getStatusBadgeVariant(item.status)} className={`capitalize ${colorClass} border-${colorClass.replace('text-', '')}`}>
+                              <IconComponent className="mr-1.5 h-3.5 w-3.5" />
+                              {item.status}
+                            </Badge>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                            <p><span className="font-medium">Patient's Value:</span> <span className={colorClass}>{item.patientValue} {item.unit || ''}</span></p>
+                            <p><span className="font-medium">Normal Range/Expected:</span> {item.normalRangeOrExpected} {item.unit || ''}</p>
+                          </div>
+                          {item.interpretation && (
+                            <p className="text-xs text-muted-foreground mt-1.5 italic whitespace-pre-wrap">Note: {item.interpretation}</p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            
+              <div>
+                <h3 className="font-semibold text-lg mb-2 flex items-center">
+                   <ReportIcon className="mr-2 h-5 w-5 text-primary" /> Key Findings Summary
+                </h3>
+                <p className="text-sm text-foreground whitespace-pre-wrap p-3 bg-muted rounded-md">{state.data.keyFindingsSummary}</p>
+              </div>
+
               <div>
                 <h3 className="font-semibold text-lg mb-2 flex items-center">
                   <User className="mr-2 h-5 w-5 text-primary" /> Personalized Recommendations
                 </h3>
-                <p className="text-sm text-foreground whitespace-pre-wrap p-3 bg-muted rounded-md">{state.data.personalizedRecommendations}</p>
-              </div>
-               <div>
-                <h3 className="font-semibold text-lg mb-2 flex items-center">
-                  <ReportIcon className="mr-2 h-5 w-5 text-primary" /> Key Findings
-                </h3>
-                <p className="text-sm text-foreground whitespace-pre-wrap p-3 bg-muted rounded-md">{state.data.keyFindings}</p>
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg mb-2 flex items-center">
-                  <Users className="mr-2 h-5 w-5 text-primary" /> Summary
-                </h3>
-                <p className="text-sm text-foreground whitespace-pre-wrap p-3 bg-muted rounded-md">{state.data.summary}</p>
+                <div className="text-sm text-foreground whitespace-pre-wrap p-3 bg-muted rounded-md">
+                    {state.data.personalizedRecommendations?.split('\n').map((line, idx) => (
+                        <p key={idx} className={line.trim().startsWith('- ') || line.trim().startsWith('* ') ? 'ml-4' : ''}>{line}</p>
+                    ))}
+                </div>
               </div>
             </CardContent>
              <CardFooter>
