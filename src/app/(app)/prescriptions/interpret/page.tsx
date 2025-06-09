@@ -13,8 +13,8 @@ import { interpretPrescriptionAction, InterpretPrescriptionState } from '@/lib/a
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { 
-  FileUp, AlertCircle, CheckCircle2, Pill, Clock, Target, Info, Download,
-  ClipboardList, AlertTriangle as SideEffectsIcon, ShieldAlert, Archive, RotateCcw
+  FileUp, AlertCircle, CheckCircle2, Pill, Target, Download,
+  AlertTriangle as SideEffectsIcon
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -81,13 +81,13 @@ export default function InterpretPrescriptionPage() {
   };
 
   const DetailItem = ({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value?: string }) => {
-    const displayValue = (value && value.trim() !== '' && value.toLowerCase() !== 'not specified') ? value : 'Not specified in prescription';
+    const displayValue = (value && value.trim() !== '') ? value : 'Information not available';
     return (
       <div className="flex items-start gap-2">
         <Icon className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
         <div>
           <p className="text-sm font-medium">{label}:</p>
-          <p className={`text-sm whitespace-pre-wrap ${displayValue === 'Not specified in prescription' ? 'text-muted-foreground italic' : 'text-foreground'}`}>
+          <p className={`text-sm whitespace-pre-wrap ${displayValue === 'Information not available' ? 'text-muted-foreground italic' : 'text-foreground'}`}>
             {displayValue}
           </p>
         </div>
@@ -104,7 +104,7 @@ export default function InterpretPrescriptionPage() {
           <CardHeader>
             <CardTitle className="font-headline text-2xl">Upload Prescription</CardTitle>
             <CardDescription>
-              Upload a medical prescription document for AI-powered interpretation of medications, dosage, timing, and other important details.
+              Upload a medical prescription document for AI-powered interpretation of medication uses and side effects.
             </CardDescription>
           </CardHeader>
           <form action={formAction}>
@@ -167,13 +167,7 @@ export default function InterpretPrescriptionPage() {
                       </AccordionTrigger>
                       <AccordionContent className="space-y-3 pl-2 pr-2 pt-2">
                         <DetailItem icon={Target} label="Purpose / Indication" value={med.purpose} />
-                        <DetailItem icon={Info} label="Dosage" value={med.dosage} />
-                        <DetailItem icon={Clock} label="Timing" value={med.timing} />
-                        <DetailItem icon={ClipboardList} label="How to Take" value={med.howToTake} />
                         <DetailItem icon={SideEffectsIcon} label="Common Side Effects" value={med.commonSideEffects} />
-                        <DetailItem icon={ShieldAlert} label="Precautions & Warnings" value={med.precautions} />
-                        <DetailItem icon={Archive} label="Storage" value={med.storage} />
-                        <DetailItem icon={RotateCcw} label="Missed Dose" value={med.missedDose} />
                       </AccordionContent>
                     </AccordionItem>
                   ))}
@@ -191,4 +185,3 @@ export default function InterpretPrescriptionPage() {
     </>
   );
 }
-
