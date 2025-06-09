@@ -1,3 +1,4 @@
+
 import {
   SidebarProvider,
   Sidebar,
@@ -10,7 +11,7 @@ import {
 import { SidebarNav } from '@/components/layout/SidebarNav';
 import { AppLogo } from '@/components/layout/AppLogo';
 import { Button } from '@/components/ui/button';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, X } from 'lucide-react'; // Added X icon
 // import { ModeToggle } from '@/components/ModeToggle'; // Assuming you might add this later
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -25,6 +26,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarContent>
         <SidebarFooter>
           {/* <ModeToggle /> You can add a theme toggle here */}
+          <div className="flex items-center justify-between rounded-md bg-destructive px-3 py-1.5 text-sm text-destructive-foreground">
+            <span>N 1 Issue</span>
+            <Button variant="ghost" size="icon" className="h-5 w-5 -mr-1 text-destructive-foreground hover:bg-destructive/80 hover:text-destructive-foreground">
+              <X className="h-3 w-3" />
+              <span className="sr-only">Dismiss issue</span>
+            </Button>
+          </div>
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
