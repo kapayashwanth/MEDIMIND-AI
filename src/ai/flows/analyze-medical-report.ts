@@ -83,32 +83,32 @@ Based on all the provided information, please perform the following:
 
 1.  **Detailed Test Results**:
     *   For each significant quantifiable test found in the report (e.g., blood tests, vitals), extract:
-        *   `testName`: The name of the test.
-        *   `patientValue`: The patient's result for that test, including units.
-        *   `normalRangeOrExpected`: The normal reference range for that test, including units.
-        *   `unit`: The measurement unit (e.g., mg/dL, g/dL).
-        *   `status`: Categorize the patient's value:
+        *   \\\`testName\\\`: The name of the test.
+        *   \\\`patientValue\\\`: The patient's result for that test, including units.
+        *   \\\`normalRangeOrExpected\\\`: The normal reference range for that test, including units.
+        *   \\\`unit\\\`: The measurement unit (e.g., mg/dL, g/dL).
+        *   \\\`status\\\`: Categorize the patient's value:
             *   'normal': If within the normal range.
             *   'low': If significantly below the normal range and concerning.
             *   'high': If significantly above the normal range and concerning.
             *   'watch': If borderline or mildly outside the normal range, warranting observation.
             *   'danger': If critically outside the normal range, indicating potential immediate concern.
-        *   `interpretation`: A *very brief* (1-2 sentences max) explanation if the status is not 'normal'.
+        *   \\\`interpretation\\\`: A *very brief* (1-2 sentences max) explanation if the status is not 'normal'.
     *   For significant qualitative findings (e.g., from imaging reports like X-rays, MRIs):
-        *   `testName`: A descriptive name for the observation (e.g., "Lung Field Observation", "Bone Structure Finding").
-        *   `patientValue`: The observed finding (e.g., "Clear to auscultation", "No acute fracture identified", "Small opacity noted in left lower lobe").
-        *   `normalRangeOrExpected`: The expected or normal finding (e.g., "Clear", "No fracture", "No opacity").
-        *   `status`:
+        *   \\\`testName\\\`: A descriptive name for the observation (e.g., "Lung Field Observation", "Bone Structure Finding").
+        *   \\\`patientValue\\\`: The observed finding (e.g., "Clear to auscultation", "No acute fracture identified", "Small opacity noted in left lower lobe").
+        *   \\\`normalRangeOrExpected\\\`: The expected or normal finding (e.g., "Clear", "No fracture", "No opacity").
+        *   \\\`status\\\`:
             *   'normal': If the finding is as expected.
             *   'info': For descriptive findings that are part of the report but not necessarily deviations.
             *   'watch': For findings that are mildly abnormal or need follow-up.
             *   'danger': For significant abnormal findings (e.g., "Large mass detected").
-        *   `interpretation`: A *very brief* explanation if the status is not 'normal' or 'info'.
-    *   Populate the \`detailedTestResults\` array with these structured items. Be selective; focus on the most relevant results.
+        *   \\\`interpretation\\\`: A *very brief* explanation if the status is not 'normal' or 'info'.
+    *   Populate the \\\`detailedTestResults\\\` array with these structured items. Be selective; focus on the most relevant results.
 
 2.  **Concise Summary**: Provide a very brief (1-2 sentences) overall summary of what the report is (e.g., "This is a blood panel report focusing on metabolic markers.").
 
-3.  **Key Findings Summary**: Based *only* on the \`detailedTestResults\`, write a very concise summary (2-3 sentences max) of the *most critical abnormal findings*. If all tests are normal, state "All key results are within normal limits."
+3.  **Key Findings Summary**: Based *only* on the \\\`detailedTestResults\\\`, write a very concise summary (2-3 sentences max) of the *most critical abnormal findings*. If all tests are normal, state "All key results are within normal limits."
 
 4.  **Overall Risk Assessment**: Based on the entirety of the report and findings, determine an overall risk level. Categorize as "Normal", "Watch", or "Danger". Briefly (1-2 sentences) explain your reasoning.
 
@@ -139,4 +139,3 @@ const analyzeMedicalReportFlow = ai.defineFlow(
   }
 );
 
-```
