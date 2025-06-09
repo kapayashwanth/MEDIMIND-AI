@@ -68,7 +68,7 @@ export default function ReportAnalysisPage() {
     const input = resultsRef.current;
     if (input) {
       try {
-        const canvas = await html2canvas(input, { scale: 2, useCORS: true });
+        const canvas = await html2canvas(input, { scale: 2, useCORS: true, backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--card').trim() || '#1c1c1c' });
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF({
           orientation: 'portrait',
@@ -79,7 +79,6 @@ export default function ReportAnalysisPage() {
         pdf.save('MediMind_AI_Report_Summary.pdf');
       } catch (error) {
         console.error("Error generating PDF:", error);
-        // Add a user-friendly error message here, e.g., using a toast
       }
     }
   };
@@ -87,9 +86,11 @@ export default function ReportAnalysisPage() {
   const getOverallRiskAssessmentClass = (risk?: string) => {
     if (!risk) return 'border-muted text-muted-foreground';
     const lowerRisk = risk.toLowerCase();
-    if (lowerRisk.includes('danger')) return 'border-destructive bg-destructive/10 text-destructive';
-    if (lowerRisk.includes('watch')) return 'border-yellow-500 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400';
-    if (lowerRisk.includes('normal')) return 'border-green-500 bg-green-500/10 text-green-600 dark:text-green-400';
+    // Using theme variables for colors would be ideal here if direct Tailwind classes for HSL don't exist
+    // For now, rely on destructive, and add specific classes for watch/normal if theme doesn't cover it well.
+    if (lowerRisk.includes('danger')) return 'border-destructive bg-destructive/10 text-destructive-foreground'; // text-destructive-foreground should be light
+    if (lowerRisk.includes('watch')) return 'border-yellow-500 bg-yellow-500/10 text-yellow-500 dark:text-yellow-400'; // Keep yellow for watch
+    if (lowerRisk.includes('normal')) return 'border-green-500 bg-green-500/10 text-green-500 dark:text-green-400'; // Keep green for normal
     return 'border-muted text-muted-foreground';
   };
 
@@ -110,22 +111,22 @@ export default function ReportAnalysisPage() {
     }
   };
   
- const getStatusColorAndIcon = (status?: TestResultItem['status']): { colorClass: string; IconComponent: React.ElementType } => {
-    if (!status) return { colorClass: 'text-muted-foreground', IconComponent: Info };
+ const getStatusColorAndIcon = (status?: TestResultItem['status']): { colorClassForValue: string; IconComponent: React.ElementType } => {
+    if (!status) return { colorClassForValue: 'text-muted-foreground', IconComponent: Info };
     switch (status.toLowerCase()) {
       case 'normal':
-        return { colorClass: 'text-green-500 dark:text-green-400', IconComponent: CheckCircle };
+        return { colorClassForValue: 'text-green-500 dark:text-green-400', IconComponent: CheckCircle };
       case 'watch':
-        return { colorClass: 'text-yellow-500 dark:text-yellow-400', IconComponent: Activity };
+        return { colorClassForValue: 'text-yellow-500 dark:text-yellow-400', IconComponent: Activity };
       case 'danger':
-        return { colorClass: 'text-red-600 dark:text-red-500', IconComponent: AlertOctagon };
+        return { colorClassForValue: 'text-destructive', IconComponent: AlertOctagon }; // text-destructive for value text
       case 'low':
-         return { colorClass: 'text-red-600 dark:text-red-500', IconComponent: ArrowDownCircle };
+         return { colorClassForValue: 'text-destructive', IconComponent: ArrowDownCircle }; // text-destructive for value text
       case 'high':
-        return { colorClass: 'text-red-600 dark:text-red-500', IconComponent: ArrowUpCircle };
+        return { colorClassForValue: 'text-destructive', IconComponent: ArrowUpCircle }; // text-destructive for value text
       case 'info':
       default:
-        return { colorClass: 'text-blue-500 dark:text-blue-400', IconComponent: Info };
+        return { colorClassForValue: 'text-primary', IconComponent: Info }; // Use primary for info text
     }
   };
 
@@ -247,18 +248,19 @@ export default function ReportAnalysisPage() {
                   </h3>
                   <div className="space-y-4">
                     {state.data.detailedTestResults.map((item, index) => {
-                      const { colorClass, IconComponent } = getStatusColorAndIcon(item.status);
+                      const badgeVariant = getStatusBadgeVariant(item.status);
+                      const { colorClassForValue, IconComponent } = getStatusColorAndIcon(item.status);
                       return (
                         <div key={index} className="p-3 bg-muted/50 rounded-md border">
                           <div className="flex justify-between items-start mb-1">
                             <h4 className="font-medium text-foreground">{item.testName}</h4>
-                            <Badge variant={getStatusBadgeVariant(item.status)} className={`capitalize ${colorClass} border-${colorClass.replace('text-', '')}`}>
-                              <IconComponent className="mr-1.5 h-3.5 w-3.5" />
+                            <Badge variant={badgeVariant} className="capitalize">
+                              <IconComponent className="mr-1.5 h-3.5 w-3.5" /> {/* Icon should inherit color from badge variant correctly now */}
                               {item.status}
                             </Badge>
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                            <p><span className="font-medium">Patient's Value:</span> <span className={colorClass}>{item.patientValue} {item.unit || ''}</span></p>
+                            <p><span className="font-medium">Patient's Value:</span> <span className={colorClassForValue}>{item.patientValue} {item.unit || ''}</span></p>
                             <p><span className="font-medium">Normal Range/Expected:</span> {item.normalRangeOrExpected} {item.unit || ''}</p>
                           </div>
                           {item.interpretation && (
