@@ -1,7 +1,8 @@
+
 'use client';
 
-import { useState, ChangeEvent } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useState, ChangeEvent, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -29,7 +30,7 @@ function SubmitButton() {
 }
 
 export default function InterpretPrescriptionPage() {
-  const [state, formAction] = useFormState(interpretPrescriptionAction, initialState);
+  const [state, formAction] = useActionState(interpretPrescriptionAction, initialState);
   const [prescriptionFile, setPrescriptionFile] = useState<File | null>(null);
   const [prescriptionDataUri, setPrescriptionDataUri] = useState<string>('');
   const [fileName, setFileName] = useState<string>('');

@@ -1,7 +1,8 @@
+
 'use client';
 
-import { useState, ChangeEvent, FormEvent } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useState, ChangeEvent, FormEvent, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -29,7 +30,7 @@ function SubmitButton() {
 }
 
 export default function ReportAnalysisPage() {
-  const [state, formAction] = useFormState(analyzeReportAction, initialState);
+  const [state, formAction] = useActionState(analyzeReportAction, initialState);
   const [reportFile, setReportFile] = useState<File | null>(null);
   const [reportDataUri, setReportDataUri] = useState<string>('');
   const [fileName, setFileName] = useState<string>('');
