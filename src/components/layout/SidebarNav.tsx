@@ -37,10 +37,10 @@ export function SidebarNav() {
               tooltip={item.label}
               onClick={() => setOpenMobile(false)}
             >
-              <a>
+              <>
                 <item.icon className="h-5 w-5" />
                 <span>{item.label}</span>
-              </a>
+              </>
             </SidebarMenuButton>
           </Link>
         </SidebarMenuItem>
@@ -48,4 +48,3 @@ export function SidebarNav() {
     </SidebarMenu>
   );
 }
-
