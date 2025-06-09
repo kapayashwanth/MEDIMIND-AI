@@ -534,33 +534,26 @@ const SidebarMenuButton = React.forwardRef<
 >(
   (
     {
-      asChild: renderAsSlot = false, // This is SidebarMenuButton's own asChild prop
+      asChild: renderAsSlot = false,
       isActive = false,
       variant = "default",
       size = "default",
       tooltip,
       className,
       children,
-      ...restProps // Contains other props, potentially including 'asChild' from a parent <Link asChild>
+      ...restProps
     },
     ref
   ) => {
     const { isMobile, state } = useSidebar();
     const Comp = renderAsSlot ? Slot : "button";
 
-    // Destructure 'asChild' from restProps to isolate it if it comes from a parent (e.g., Link).
-    // Alias it to 'parentAsChild' to avoid conflict with SidebarMenuButton's own 'asChild' prop (renderAsSlot).
     const { asChild: parentAsChild, ...finalRestProps } = restProps;
-
     let propsForElement;
 
-    if (renderAsSlot) { // If SidebarMenuButton's own asChild prop is true, Comp is Slot.
-      // Pass all restProps (including parentAsChild, if any) to the Slot component.
-      // Slot will handle merging these with its child.
+    if (renderAsSlot) {
       propsForElement = restProps;
-    } else { // If SidebarMenuButton's own asChild prop is false, Comp is a DOM element (e.g. "button").
-      // We must not pass parentAsChild (i.e., asChild from Link) to the DOM element.
-      // So, use finalRestProps which has parentAsChild excluded.
+    } else {
       propsForElement = finalRestProps;
     }
 
@@ -571,7 +564,7 @@ const SidebarMenuButton = React.forwardRef<
         data-size={size}
         data-active={isActive}
         className={cn(sidebarMenuButtonVariants({ variant, size, className }))}
-        {...propsForElement} // Spread the correctly filtered/passed props
+        {...propsForElement}
       >
         {children}
       </Comp>
@@ -592,10 +585,14 @@ const SidebarMenuButton = React.forwardRef<
     } else {
       tooltipContentPropsInternal = { ...tooltipContentPropsInternal, ...tooltip };
     }
+    
+    // If Comp is a DOM element (button) and TooltipTrigger uses asChild,
+    // buttonElement must be wrapped in Slot to correctly receive asChild from TooltipTrigger.
+    const triggerActualChild = Comp === Slot ? buttonElement : <Slot>{buttonElement}</Slot>;
 
     return (
       <Tooltip>
-        <TooltipTrigger asChild>{buttonElement}</TooltipTrigger>
+        <TooltipTrigger asChild>{triggerActualChild}</TooltipTrigger>
         <TooltipContent {...tooltipContentPropsInternal} />
       </Tooltip>
     );
