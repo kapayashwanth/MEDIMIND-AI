@@ -12,7 +12,10 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { interpretPrescriptionAction, InterpretPrescriptionState } from '@/lib/actions/interpretPrescriptionAction';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { FileUp, AlertCircle, CheckCircle2, Pill, Clock, Target, Info, Download } from 'lucide-react';
+import { 
+  FileUp, AlertCircle, CheckCircle2, Pill, Clock, Target, Info, Download,
+  ClipboardList, AlertTriangle as SideEffectsIcon, ShieldAlert, Archive, RotateCcw // Using 'AlertTriangle as SideEffectsIcon' to avoid name collision
+} from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -78,6 +81,20 @@ export default function InterpretPrescriptionPage() {
     }
   };
 
+  const DetailItem = ({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value?: string }) => {
+    if (!value || value.toLowerCase() === 'not specified') return null;
+    return (
+      <div className="flex items-start gap-2">
+        <Icon className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+        <div>
+          <p className="text-sm font-medium">{label}:</p>
+          <p className="text-sm text-foreground whitespace-pre-wrap">{value}</p>
+        </div>
+      </div>
+    );
+  };
+
+
   return (
     <>
       <PageHeader title="Interpret Prescription" />
@@ -86,7 +103,7 @@ export default function InterpretPrescriptionPage() {
           <CardHeader>
             <CardTitle className="font-headline text-2xl">Upload Prescription</CardTitle>
             <CardDescription>
-              Upload a medical prescription document for AI-powered interpretation of medications, dosage, and timing.
+              Upload a medical prescription document for AI-powered interpretation of medications, dosage, timing, and other important details.
             </CardDescription>
           </CardHeader>
           <form action={formAction}>
@@ -138,7 +155,7 @@ export default function InterpretPrescriptionPage() {
             </CardHeader>
             <CardContent>
               {state.data.medications.length > 0 ? (
-                <Accordion type="single" collapsible className="w-full">
+                <Accordion type="single" collapsible className="w-full" defaultValue="item-0">
                   {state.data.medications.map((med, index) => (
                     <AccordionItem value={`item-${index}`} key={index}>
                       <AccordionTrigger className="text-lg font-semibold hover:no-underline">
@@ -148,27 +165,14 @@ export default function InterpretPrescriptionPage() {
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="space-y-3 pl-2 pr-2 pt-2">
-                        <div className="flex items-start gap-2">
-                          <Target className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
-                          <div>
-                            <p className="text-sm font-medium">Purpose:</p>
-                            <p className="text-sm text-foreground">{med.purpose || 'Not specified'}</p>
-                          </div>
-                        </div>
-                         <div className="flex items-start gap-2">
-                          <Info className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
-                          <div>
-                            <p className="text-sm font-medium">Dosage:</p>
-                            <p className="text-sm text-foreground">{med.dosage || 'Not specified'}</p>
-                          </div>
-                        </div>
-                         <div className="flex items-start gap-2">
-                          <Clock className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
-                          <div>
-                            <p className="text-sm font-medium">Timing:</p>
-                            <p className="text-sm text-foreground">{med.timing || 'Not specified'}</p>
-                          </div>
-                        </div>
+                        <DetailItem icon={Target} label="Purpose" value={med.purpose} />
+                        <DetailItem icon={Info} label="Dosage" value={med.dosage} />
+                        <DetailItem icon={Clock} label="Timing" value={med.timing} />
+                        <DetailItem icon={ClipboardList} label="How to Take" value={med.howToTake} />
+                        <DetailItem icon={SideEffectsIcon} label="Common Side Effects" value={med.commonSideEffects} />
+                        <DetailItem icon={ShieldAlert} label="Precautions & Warnings" value={med.precautions} />
+                        <DetailItem icon={Archive} label="Storage" value={med.storage} />
+                        <DetailItem icon={RotateCcw} label="Missed Dose" value={med.missedDose} />
                       </AccordionContent>
                     </AccordionItem>
                   ))}
@@ -186,3 +190,4 @@ export default function InterpretPrescriptionPage() {
     </>
   );
 }
+

@@ -12,9 +12,11 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { analyzeReportAction, AnalyzeReportState } from '@/lib/actions/analyzeReportAction';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { FileUp, AlertCircle, CheckCircle2, Download, User, Users } from 'lucide-react';
+import { FileUp, AlertCircle, CheckCircle2, Download, User, Users, FileScan as ReportIcon } from 'lucide-react'; // Renamed FileScan to ReportIcon to avoid conflict
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 
 const initialState: AnalyzeReportState = {
   message: null,
@@ -95,7 +97,7 @@ export default function ReportAnalysisPage() {
           <CardHeader>
             <CardTitle className="font-headline text-2xl">Upload Report</CardTitle>
             <CardDescription>
-              Upload an X-ray, MRI, lab results, or other medical test report along with patient information for AI analysis.
+              Upload an X-ray, MRI, lab results, or other medical test report for AI analysis. Age, gender, and other information are optional but can improve results.
             </CardDescription>
           </CardHeader>
           <form action={formAction}>
@@ -131,7 +133,17 @@ export default function ReportAnalysisPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="gender">Patient Gender (Optional)</Label>
-                  <Input id="gender" name="gender" type="text" placeholder="e.g., Male, Female, Other" className="bg-background" />
+                  <Select name="gender" defaultValue="">
+                    <SelectTrigger className="w-full bg-background">
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Male">Male</SelectItem>
+                      <SelectItem value="Female">Female</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                      <SelectItem value="">Prefer not to say</SelectItem>
+                    </SelectContent>
+                  </Select>
                    {state.errors?.gender && (
                     <p className="text-sm font-medium text-destructive">{state.errors.gender[0]}</p>
                   )}
@@ -139,12 +151,12 @@ export default function ReportAnalysisPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="patientInformation">Additional Patient Information</Label>
+                <Label htmlFor="patientInformation">Additional Patient Information (Optional)</Label>
                 <Textarea
                   id="patientInformation"
                   name="patientInformation"
-                  placeholder="Enter relevant patient history, symptoms, or context for the report..."
-                  rows={4}
+                  placeholder="Enter relevant patient history, symptoms, or context for the report (optional)..."
+                  rows={3}
                   className="bg-background"
                 />
                 {state.errors?.patientInformation && (
@@ -193,7 +205,7 @@ export default function ReportAnalysisPage() {
               </div>
                <div>
                 <h3 className="font-semibold text-lg mb-2 flex items-center">
-                  <FileScan className="mr-2 h-5 w-5 text-primary" /> Key Findings
+                  <ReportIcon className="mr-2 h-5 w-5 text-primary" /> Key Findings
                 </h3>
                 <p className="text-sm text-foreground whitespace-pre-wrap p-3 bg-muted rounded-md">{state.data.keyFindings}</p>
               </div>
@@ -213,3 +225,4 @@ export default function ReportAnalysisPage() {
     </>
   );
 }
+

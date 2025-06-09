@@ -1,3 +1,4 @@
+
 'use server';
 
 import { analyzeMedicalReport, AnalyzeMedicalReportInput, AnalyzeMedicalReportOutput } from '@/ai/flows/analyze-medical-report';
@@ -5,9 +6,9 @@ import { z } from 'zod';
 
 const FormSchema = z.object({
   reportDataUri: z.string().min(1, "Report file is required."),
-  patientInformation: z.string().min(1, "Patient information is required."),
-  age: z.string().optional(), // Age is optional
-  gender: z.string().optional(), // Gender is optional
+  patientInformation: z.string().optional(), // Now optional
+  age: z.string().optional(),
+  gender: z.string().optional(),
 });
 
 export type AnalyzeReportState = {
@@ -69,3 +70,4 @@ export async function analyzeReportAction(
     };
   }
 }
+

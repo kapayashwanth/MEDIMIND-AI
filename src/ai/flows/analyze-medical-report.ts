@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -20,9 +21,10 @@ const AnalyzeMedicalReportInputSchema = z.object({
     ),
   patientInformation: z
     .string()
-    .describe('Relevant patient information, such as medical history, symptoms.'),
+    .optional()
+    .describe('Optional: Relevant patient information, such as medical history, symptoms.'),
   age: z.string().optional().describe("The patient's age."),
-  gender: z.string().optional().describe("The patient's gender."),
+  gender: z.string().optional().describe("The patient's gender (e.g., Male, Female, Other)."),
 });
 export type AnalyzeMedicalReportInput = z.infer<typeof AnalyzeMedicalReportInputSchema>;
 
@@ -53,7 +55,7 @@ const prompt = ai.definePrompt({
   prompt: `You are an advanced medical AI assistant. Your task is to analyze the provided medical test report and patient information.
 
 Patient Information:
-- General: {{{patientInformation}}}
+{{#if patientInformation}}- General: {{{patientInformation}}}{{else}}- General: No additional patient information provided.{{/if}}
 {{#if age}}- Age: {{{age}}}{{/if}}
 {{#if gender}}- Gender: {{{gender}}}{{/if}}
 
@@ -81,10 +83,11 @@ const analyzeMedicalReportFlow = ai.defineFlow(
     }
     // Ensure all required fields are present, even if empty strings, to match schema
     return {
-      keyFindings: output.keyFindings || '',
-      summary: output.summary || '',
-      riskAssessment: output.riskAssessment || 'Not Determined',
+      keyFindings: output.keyFindings || 'No key findings extracted.',
+      summary: output.summary || 'No summary provided.',
+      riskAssessment: output.riskAssessment || 'Risk assessment not determined.',
       personalizedRecommendations: output.personalizedRecommendations || 'No specific recommendations generated.',
     };
   }
 );
+
