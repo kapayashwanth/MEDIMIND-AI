@@ -14,7 +14,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { 
   FileUp, AlertCircle, CheckCircle2, Pill, Clock, Target, Info, Download,
-  ClipboardList, AlertTriangle as SideEffectsIcon, ShieldAlert, Archive, RotateCcw // Using 'AlertTriangle as SideEffectsIcon' to avoid name collision
+  ClipboardList, AlertTriangle as SideEffectsIcon, ShieldAlert, Archive, RotateCcw
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -76,19 +76,20 @@ export default function InterpretPrescriptionPage() {
         pdf.save('MediMind_AI_Prescription_Summary.pdf');
       } catch (error) {
         console.error("Error generating PDF:", error);
-        // Add a user-friendly error message here, e.g., using a toast
       }
     }
   };
 
   const DetailItem = ({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value?: string }) => {
-    if (!value || value.toLowerCase() === 'not specified') return null;
+    const displayValue = (value && value.trim() !== '' && value.toLowerCase() !== 'not specified') ? value : 'Not specified in prescription';
     return (
       <div className="flex items-start gap-2">
         <Icon className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
         <div>
           <p className="text-sm font-medium">{label}:</p>
-          <p className="text-sm text-foreground whitespace-pre-wrap">{value}</p>
+          <p className={`text-sm whitespace-pre-wrap ${displayValue === 'Not specified in prescription' ? 'text-muted-foreground italic' : 'text-foreground'}`}>
+            {displayValue}
+          </p>
         </div>
       </div>
     );
@@ -165,7 +166,7 @@ export default function InterpretPrescriptionPage() {
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="space-y-3 pl-2 pr-2 pt-2">
-                        <DetailItem icon={Target} label="Purpose" value={med.purpose} />
+                        <DetailItem icon={Target} label="Purpose / Indication" value={med.purpose} />
                         <DetailItem icon={Info} label="Dosage" value={med.dosage} />
                         <DetailItem icon={Clock} label="Timing" value={med.timing} />
                         <DetailItem icon={ClipboardList} label="How to Take" value={med.howToTake} />
