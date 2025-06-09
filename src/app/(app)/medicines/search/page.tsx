@@ -1,6 +1,7 @@
+
 'use client';
 
-import { ChangeEvent, useActionState, useRef } from 'react';
+import { ChangeEvent, useActionState, useRef, useState } from 'react'; // Added useState
 import { useFormStatus } from 'react-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Input } from '@/components/ui/input';
@@ -53,7 +54,13 @@ export default function MedicineSearchPage() {
             <form
               ref={formRef}
               action={(formData) => {
-                formAction(formData);
+                // We'll directly use the searchTerm from state for the action
+                // No need to manually append to formData if the input field is named correctly
+                // or if we pass it directly.
+                // For actions, it's often cleaner to reconstruct the data passed.
+                const newFormData = new FormData();
+                newFormData.append('searchTerm', searchTerm);
+                formAction(newFormData);
               }}
               className="space-y-4"
             >
@@ -62,14 +69,14 @@ export default function MedicineSearchPage() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground hidden sm:block pointer-events-none" />
                 <Input
                   type="search"
-                  name="searchTerm"
+                  name="searchTerm" // This name ensures formData gets the value
                   placeholder="Enter medicine name..."
                   value={searchTerm}
                   onChange={handleSearchTermChange}
                   className="w-full pl-10 py-3 text-base rounded-lg shadow-sm flex-grow"
                   aria-label="Medicine search term"
                 />
-                <input type="hidden" name="searchTerm" value={searchTerm} />
+                {/* Removed redundant hidden input */}
                 <SubmitButton />
               </div>
               {state.errors?.searchTerm && (
