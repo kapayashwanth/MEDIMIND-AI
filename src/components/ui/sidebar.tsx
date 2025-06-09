@@ -71,8 +71,6 @@ const SidebarProvider = React.forwardRef<
     const isMobile = useIsMobile()
     const [openMobile, setOpenMobile] = React.useState(false)
 
-    // This is the internal state of the sidebar.
-    // We use openProp and setOpenProp for control from outside the component.
     const [_open, _setOpen] = React.useState(defaultOpen)
     const open = openProp ?? _open
     const setOpen = React.useCallback(
@@ -84,20 +82,17 @@ const SidebarProvider = React.forwardRef<
           _setOpen(openState)
         }
 
-        // This sets the cookie to keep the sidebar state.
         document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
       },
       [setOpenProp, open]
     )
 
-    // Helper to toggle the sidebar.
     const toggleSidebar = React.useCallback(() => {
       return isMobile
         ? setOpenMobile((open) => !open)
         : setOpen((open) => !open)
     }, [isMobile, setOpen, setOpenMobile])
 
-    // Adds a keyboard shortcut to toggle the sidebar.
     React.useEffect(() => {
       const handleKeyDown = (event: KeyboardEvent) => {
         if (
@@ -113,8 +108,6 @@ const SidebarProvider = React.forwardRef<
       return () => window.removeEventListener("keydown", handleKeyDown)
     }, [toggleSidebar])
 
-    // We add a state so that we can do data-state="expanded" or "collapsed".
-    // This makes it easier to style the sidebar with Tailwind classes.
     const state = open ? "expanded" : "collapsed"
 
     const contextValue = React.useMemo<SidebarContext>(
@@ -222,7 +215,6 @@ const Sidebar = React.forwardRef<
         data-variant={variant}
         data-side={side}
       >
-        {/* This is what handles the sidebar gap on desktop */}
         <div
           className={cn(
             "duration-200 relative h-svh w-[--sidebar-width] bg-transparent transition-[width] ease-linear",
@@ -239,7 +231,6 @@ const Sidebar = React.forwardRef<
             side === "left"
               ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
               : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
-            // Adjust the padding for floating and inset variants.
             variant === "floating" || variant === "inset"
               ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]"
               : "group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:border-l",
@@ -462,7 +453,6 @@ const SidebarGroupAction = React.forwardRef<
       data-sidebar="group-action"
       className={cn(
         "absolute right-3 top-3.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-none ring-sidebar-ring transition-transform hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
-        // Increases the hit area of the button on mobile.
         "after:absolute after:-inset-2 after:md:hidden",
         "group-data-[collapsible=icon]:hidden",
         className
@@ -544,30 +534,34 @@ const SidebarMenuButton = React.forwardRef<
 >(
   (
     {
-      asChild: renderAsSlot = false,
+      asChild: renderAsSlot = false, // This is SidebarMenuButton's own asChild prop
       isActive = false,
       variant = "default",
       size = "default",
       tooltip,
       className,
       children,
-      ...restProps
+      ...restProps // Contains other props, potentially including 'asChild' from a parent <Link asChild>
     },
     ref
   ) => {
     const { isMobile, state } = useSidebar();
     const Comp = renderAsSlot ? Slot : "button";
 
-    const { asChild: parentAsChild, ...otherParentProps } = restProps;
-    let finalPropsForElement;
+    // Destructure 'asChild' from restProps to isolate it if it comes from a parent (e.g., Link).
+    // Alias it to 'parentAsChild' to avoid conflict with SidebarMenuButton's own 'asChild' prop (renderAsSlot).
+    const { asChild: parentAsChild, ...finalRestProps } = restProps;
 
-    if (Comp === Slot) {
-      // If SidebarMenuButton itself is a Slot, pass all parent props, including parent's asChild
-      finalPropsForElement = restProps;
-    } else {
-      // If SidebarMenuButton is rendering a DOM element (e.g. "button"),
-      // only pass otherParentProps, effectively stripping parentAsChild.
-      finalPropsForElement = otherParentProps;
+    let propsForElement;
+
+    if (renderAsSlot) { // If SidebarMenuButton's own asChild prop is true, Comp is Slot.
+      // Pass all restProps (including parentAsChild, if any) to the Slot component.
+      // Slot will handle merging these with its child.
+      propsForElement = restProps;
+    } else { // If SidebarMenuButton's own asChild prop is false, Comp is a DOM element (e.g. "button").
+      // We must not pass parentAsChild (i.e., asChild from Link) to the DOM element.
+      // So, use finalRestProps which has parentAsChild excluded.
+      propsForElement = finalRestProps;
     }
 
     const buttonElement = (
@@ -577,7 +571,7 @@ const SidebarMenuButton = React.forwardRef<
         data-size={size}
         data-active={isActive}
         className={cn(sidebarMenuButtonVariants({ variant, size, className }))}
-        {...finalPropsForElement}
+        {...propsForElement} // Spread the correctly filtered/passed props
       >
         {children}
       </Comp>
@@ -624,7 +618,6 @@ const SidebarMenuAction = React.forwardRef<
       data-sidebar="menu-action"
       className={cn(
         "absolute right-1 top-1.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-none ring-sidebar-ring transition-transform hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 peer-hover/menu-button:text-sidebar-accent-foreground [&>svg]:size-4 [&>svg]:shrink-0",
-        // Increases the hit area of the button on mobile.
         "after:absolute after:-inset-2 after:md:hidden",
         "peer-data-[size=sm]/menu-button:top-1",
         "peer-data-[size=default]/menu-button:top-1.5",
@@ -667,7 +660,6 @@ const SidebarMenuSkeleton = React.forwardRef<
     showIcon?: boolean
   }
 >(({ className, showIcon = false, ...props }, ref) => {
-  // Random width between 50 to 90%.
   const width = React.useMemo(() => {
     return `${Math.floor(Math.random() * 40) + 50}%`
   }, [])
