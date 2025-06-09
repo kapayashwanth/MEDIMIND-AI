@@ -1,3 +1,4 @@
+
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,7 +29,7 @@ export default function DashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Link href="/reports/analysis" passHref>
+              <Link href="/reports/analysis" asChild>
                 <Button className="w-full" variant="default">Analyze a Report</Button>
               </Link>
             </CardContent>
@@ -45,7 +46,7 @@ export default function DashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Link href="/prescriptions/interpret" passHref>
+              <Link href="/prescriptions/interpret" asChild>
                 <Button className="w-full" variant="default">Interpret Prescription</Button>
               </Link>
             </CardContent>
@@ -62,7 +63,7 @@ export default function DashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Link href="/medicines/search" passHref>
+              <Link href="/medicines/search" asChild>
                 <Button className="w-full" variant="default">Search Medicines</Button>
               </Link>
             </CardContent>
@@ -87,3 +88,4 @@ export default function DashboardPage() {
     </>
   );
 }
+
