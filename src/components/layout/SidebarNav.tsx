@@ -30,7 +30,6 @@ export function SidebarNav() {
         <SidebarMenuItem key={item.href}>
           <Link href={item.href} asChild>
             <SidebarMenuButton
-              asChild
               variant="default"
               size="default"
               isActive={pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))}
