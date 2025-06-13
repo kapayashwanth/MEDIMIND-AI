@@ -47,15 +47,15 @@ By harnessing the power of **Artificial Intelligence (AI)** and **Natural Langua
 
 ## 🚀 Installation
 
-bash
-# Clone the repository
+
+### Clone the repository
 git clone https://github.com/kapayashwanth/MEDIMIND-AI.git
 
-# Navigate into the project directory
+### Navigate into the project directory
 cd MEDIMIND-AI
 
-# Install dependencies
+### Install dependencies
 npm install
 
-# Run the development server
+### Run the development server
 npm run dev
