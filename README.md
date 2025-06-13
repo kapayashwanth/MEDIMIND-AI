@@ -1,6 +1,6 @@
 # 🧠 MEDIMIND-AI
 
-![MEDIMIND-AI Banner](./public/banner.png) <!-- Replace with actual image path or URL -->
+![MEDIMIND-AI Banner](./banner.png) <!-- Replace with actual image path or URL -->
 
 ## 🩺 Project Description
 
