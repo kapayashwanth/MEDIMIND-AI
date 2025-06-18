@@ -22,7 +22,7 @@ import html2canvas from 'html2canvas';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-// JSZip will be dynamically imported
+
 
 const initialState: AnalyzeReportState = {
   message: null,
@@ -67,37 +67,34 @@ export default function ReportAnalysisPage() {
 
   const handleDownloadReport = async () => {
     const inputElement = resultsRef.current;
-    if (!inputElement || !reportFile || !state.data) {
-      console.error("Missing data for download:", { inputElement, reportFile, stateData: state.data });
-      // Optionally, show a toast error to the user
+    if (!inputElement || !state.data) {
+      console.error("Missing data for download:", { inputElement, stateData: state.data });
       return;
     }
 
-    const tempImageContainer = document.createElement('div');
+    let tempImageContainer: HTMLDivElement | null = null;
     let canvasBackgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--card').trim();
     if (!canvasBackgroundColor || canvasBackgroundColor === 'transparent') {
-        // Fallback for themes where --card might not be sufficiently opaque or defined for PDF
         const bodyBackgroundColor = getComputedStyle(document.body).backgroundColor;
         if (bodyBackgroundColor && bodyBackgroundColor !== 'rgba(0, 0, 0, 0)' && bodyBackgroundColor !== 'transparent') {
             canvasBackgroundColor = bodyBackgroundColor;
         } else {
-            canvasBackgroundColor = '#ffffff'; // Absolute fallback to white
+            canvasBackgroundColor = '#ffffff'; 
         }
     }
 
-
-    if (reportFile.type.startsWith('image/')) {
+    if (reportFile && reportFile.type.startsWith('image/')) {
+      tempImageContainer = document.createElement('div');
       const img = document.createElement('img');
       img.src = reportDataUri;
       img.style.width = '100%';
-      img.style.maxWidth = '550px'; // Fit within typical PDF page width
+      img.style.maxWidth = '550px'; 
       img.style.height = 'auto';
       img.style.marginBottom = '20px';
       img.style.display = 'block';
       img.style.marginLeft = 'auto';
       img.style.marginRight = 'auto';
       tempImageContainer.appendChild(img);
-      // Prepend the container with the image to the main results card
       inputElement.insertBefore(tempImageContainer, inputElement.firstChild);
     }
 
@@ -106,53 +103,27 @@ export default function ReportAnalysisPage() {
         scale: 2,
         useCORS: true,
         backgroundColor: canvasBackgroundColor,
-        logging: true, // Enable logging for debugging html2canvas
-        onclone: (document) => { // Useful for debugging what html2canvas "sees"
-            // console.log('html2canvas cloned document:', document.body.innerHTML);
-        }
+        logging: true,
       });
 
-      if (reportFile.type.startsWith('image/')) {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF({
-          orientation: 'portrait',
-          unit: 'px',
-          format: [canvas.width, canvas.height], // jsPDF handles pagination for tall canvas
-        });
-        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-        pdf.save('MediMind_AI_Combined_Report.pdf');
-      } else if (reportFile.type === 'application/pdf') {
-        // Generate analysis PDF from canvas
-        const analysisImgData = canvas.toDataURL('image/png');
-        const analysisPdf = new jsPDF({
-          orientation: 'portrait',
-          unit: 'px',
-          format: [canvas.width, canvas.height],
-        });
-        analysisPdf.addImage(analysisImgData, 'PNG', 0, 0, canvas.width, canvas.height);
-        const analysisPdfBlob = analysisPdf.output('blob');
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'px',
+        format: [canvas.width, canvas.height],
+      });
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      
+      const pdfFileName = reportFile?.name.endsWith('.pdf') 
+        ? `${reportFile.name.replace(/\.pdf$/i, '')}_Analysis.pdf` 
+        : 'MediMind_AI_Analysis.pdf';
+      pdf.save(pdfFileName);
 
-        // Dynamically import JSZip and create ZIP
-        const JSZip = (await import('jszip')).default;
-        const zip = new JSZip();
-        zip.file(reportFile.name, reportFile); // Add original PDF
-        zip.file('MediMind_AI_Analysis_Summary.pdf', analysisPdfBlob); // Add analysis PDF
-
-        const zipContent = await zip.generateAsync({ type: 'blob' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(zipContent);
-        link.download = 'MediMind_AI_Report_Package.zip';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(link.href);
-      }
     } catch (error) {
-      console.error("Error generating file:", error);
+      console.error("Error generating PDF:", error);
       // TODO: Show user-friendly error (e.g., using toast)
     } finally {
-      // Cleanup: remove the temporarily added image container
-      if (reportFile.type.startsWith('image/') && tempImageContainer.parentNode === inputElement) {
+      if (tempImageContainer && tempImageContainer.parentNode === inputElement) {
         inputElement.removeChild(tempImageContainer);
       }
     }
@@ -297,9 +268,9 @@ export default function ReportAnalysisPage() {
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle className="font-headline text-2xl">Analysis Results</CardTitle>
-                <Button variant="outline" size="sm" onClick={handleDownloadReport} disabled={!reportFile}>
+                <Button variant="outline" size="sm" onClick={handleDownloadReport} disabled={!reportFile && !reportDataUri}>
                   <Download className="mr-2 h-4 w-4" />
-                  Download Report
+                  Download Analysis
                 </Button>
               </div>
                <p className="text-sm text-muted-foreground pt-2">{state.data.conciseSummary}</p>
