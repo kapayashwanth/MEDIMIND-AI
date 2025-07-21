@@ -548,14 +548,9 @@ const SidebarMenuButton = React.forwardRef<
     const { isMobile, state } = useSidebar();
     const Comp = renderAsSlot ? Slot : "button";
 
-    const { asChild: parentAsChild, ...finalRestProps } = restProps;
-    let propsForElement;
-
-    if (renderAsSlot) {
-      propsForElement = restProps;
-    } else {
-      propsForElement = finalRestProps;
-    }
+    // This is the key change: we separate the `asChild` prop that might be coming
+    // from a parent <Link asChild> component.
+    const { asChild: parentAsChild, ...otherParentProps } = restProps;
 
     const buttonElement = (
       <Comp
@@ -564,7 +559,10 @@ const SidebarMenuButton = React.forwardRef<
         data-size={size}
         data-active={isActive}
         className={cn(sidebarMenuButtonVariants({ variant, size, className }))}
-        {...propsForElement}
+        // If Comp is a button, we must not pass the parent's `asChild` prop.
+        // `otherParentProps` has it removed.
+        // If Comp is a Slot, we pass all original props from the parent.
+        {...(Comp === Slot ? restProps : otherParentProps)}
       >
         {children}
       </Comp>
@@ -586,13 +584,14 @@ const SidebarMenuButton = React.forwardRef<
       tooltipContentPropsInternal = { ...tooltipContentPropsInternal, ...tooltip };
     }
     
-    // If Comp is a DOM element (button) and TooltipTrigger uses asChild,
-    // buttonElement must be wrapped in Slot to correctly receive asChild from TooltipTrigger.
-    const triggerActualChild = Comp === Slot ? buttonElement : <Slot>{buttonElement}</Slot>;
+    // When TooltipTrigger has `asChild`, its immediate child must be able to accept
+    // its props. If our buttonElement is a raw <button>, we wrap it in <Slot>
+    // to correctly handle the prop delegation.
+    const triggerChild = Comp === Slot ? buttonElement : <Slot>{buttonElement}</Slot>;
 
     return (
       <Tooltip>
-        <TooltipTrigger asChild>{triggerActualChild}</TooltipTrigger>
+        <TooltipTrigger asChild>{triggerChild}</TooltipTrigger>
         <TooltipContent {...tooltipContentPropsInternal} />
       </Tooltip>
     );
