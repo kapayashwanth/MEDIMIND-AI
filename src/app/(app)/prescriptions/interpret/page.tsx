@@ -14,7 +14,7 @@ import { interpretPrescriptionAction, InterpretPrescriptionState } from '@/lib/a
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { 
-  FileUp, AlertCircle, CheckCircle2, Pill, Target, Download,
+  FileUp, AlertCircle, CheckCircle2, Pill, Target, Download, HeartPulse,
   AlertTriangle as SideEffectsIcon, FileText
 } from 'lucide-react';
 import jsPDF from 'jspdf';
@@ -187,6 +187,7 @@ export default function InterpretPrescriptionPage() {
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="space-y-3 pl-2 pr-2 pt-2">
+                        <DetailItem icon={HeartPulse} label="Likely For Disease" value={(med as any).expectedDisease} />
                         <DetailItem icon={Target} label="Purpose / Indication" value={med.purpose} />
                         <DetailItem icon={SideEffectsIcon} label="Common Side Effects" value={med.commonSideEffects} />
                       </AccordionContent>

@@ -3,8 +3,8 @@
 
 /**
  * @fileOverview An AI agent that interprets medical prescriptions.
- * It identifies medications and provides details on their purpose and common side effects
- * based on general medical knowledge.
+ * It identifies medications and provides details on their purpose, common side effects,
+ * and the likely disease they are prescribed for, based on general medical knowledge.
  *
  * - interpretPrescription - A function that handles the prescription interpretation process.
  * - InterpretPrescriptionInput - The input type for the interpretPrescription function.
@@ -27,10 +27,11 @@ const MedicationDetailsSchema = z.object({
   name: z.string().describe('The name of the medication, extracted from the prescription document.'),
   purpose: z.string().describe('Based on general medical knowledge: The primary purpose or indication for the medication. Be specific.'),
   commonSideEffects: z.string().describe('Based on general medical knowledge: A list or summary of key common side effects associated with the medication.'),
+  expectedDisease: z.string().describe('Based on the medication and its purpose, what is the likely disease or condition it is prescribed for (e.g., "Hypertension", "Type 2 Diabetes", "Bacterial Infection").'),
 });
 
 const InterpretPrescriptionOutputSchema = z.object({
-  medications: z.array(MedicationDetailsSchema).describe('An array of medications with their name, purpose, and common side effects.'),
+  medications: z.array(MedicationDetailsSchema).describe('An array of medications with their details.'),
 });
 export type InterpretPrescriptionOutput = z.infer<typeof InterpretPrescriptionOutputSchema>;
 
@@ -45,13 +46,14 @@ const prompt = ai.definePrompt({
   prompt: `You are a medical expert specializing in interpreting prescriptions and providing drug information.
 Analyze the following prescription document. For each medication identified:
 
-1.  **Medication Name**: Extract the name of the medication *from the document*. This is crucial.
-2.  **Purpose/Indication**: Based on your **general medical knowledge** of the identified medication, describe its primary purpose(s) or indication(s). Be specific.
-3.  **Common Side Effects**: Based on your **general medical knowledge** of the identified medication, list its key common side effects.
+1.  **Medication Name**: Extract the name of the medication *from the document*.
+2.  **Purpose/Indication**: Based on your **general medical knowledge** of the identified medication, describe its primary purpose(s) or indication(s).
+3.  **Common Side Effects**: Based on your **general medical knowledge**, list its key common side effects.
+4.  **Expected Disease**: Based on the medication and its purpose, infer the likely **disease or condition** it is prescribed to treat (e.g., "Hypertension", "Type 2 Diabetes", "Bacterial Infection").
 
 Prescription: {{media url=prescriptionDataUri}}
 
-Return the information structured according to the provided JSON schema. Ensure that 'name', 'purpose', and 'commonSideEffects' are always populated for each medication based on the instructions above. If a medication name cannot be reliably extracted, do not include an entry for it.`,
+Return the information structured according to the provided JSON schema. Ensure all fields are populated for each medication. If a medication name cannot be reliably extracted, do not include an entry for it.`,
 });
 
 const interpretPrescriptionFlow = ai.defineFlow(
@@ -70,6 +72,7 @@ const interpretPrescriptionFlow = ai.defineFlow(
         name: med.name || 'Unnamed Medication',
         purpose: med.purpose || 'Purpose not determined by AI.',
         commonSideEffects: med.commonSideEffects || 'Side effects not determined by AI.',
+        expectedDisease: med.expectedDisease || 'Expected disease not determined by AI.',
     }));
     return { medications: processedMedications };
   }
