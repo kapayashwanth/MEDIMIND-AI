@@ -64,20 +64,23 @@ export function Chatbot() {
        setMessages((prev) => [...prev, { role: 'model', text: state.error as string }]);
     }
   }, [state]);
-
-  const handleFormSubmit = async (formData: FormData) => {
+  
+  const handleFormSubmit = (formData: FormData) => {
     const userMessage = formData.get('message') as string;
     if (!userMessage.trim()) return;
-
-    setMessages((prev) => [...prev, { role: 'user', text: userMessage }]);
+    
+    setMessages(prev => [...prev, { role: 'user', text: userMessage }]);
     formAction(formData);
     setInput('');
-    formRef.current?.reset();
   };
-
+  
   const handlePreloadClick = (message: string) => {
     const newFormData = new FormData();
     newFormData.append('message', message);
+    // When a preloaded message is clicked, the history is empty
+    messages.forEach(msg => {
+       newFormData.append('history', JSON.stringify(msg));
+    });
     handleFormSubmit(newFormData);
   }
 
@@ -140,16 +143,11 @@ export function Chatbot() {
           <CardFooter className="pt-4 border-t">
             <form 
              ref={formRef}
-             action={(formData) => {
-                const message = formData.get('message') as string;
-                const historyForAction = new FormData();
-                historyForAction.append('message', message);
-                messages.forEach(msg => {
-                    historyForAction.append('history', JSON.stringify(msg));
-                });
-                handleFormSubmit(historyForAction);
-             }}
+             action={handleFormSubmit}
              className="flex items-center gap-2 w-full">
+               {messages.map((msg, index) => (
+                    <input type="hidden" key={index} name="history" value={JSON.stringify(msg)} />
+                ))}
               <Input
                 name="message"
                 placeholder="Type a message..."
