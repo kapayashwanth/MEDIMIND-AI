@@ -25,7 +25,7 @@ const MedicineOutputSchema = z.object({
   dosageForms: z.array(z.string()).describe('Common dosage forms (e.g., tablet, capsule, syrup).'),
   commonSideEffects: z.array(z.string()).describe('A list of common side effects.'),
   imageUrl: z.string().optional().describe('A publicly accessible URL for an image of the medicine, if available. Otherwise, omit.'),
-  imageHint: z.string().optional().describe('A 1-2 word hint for the image, if an imageUrl is provided. Otherwise, omit.'),
+  imageHint: z.string().optional().describe('A 1-2 word hint for the image (e.g., "pills capsules", "syrup bottle"). Otherwise, omit.'),
 });
 
 export async function searchMedicine(input: SearchMedicineInput): Promise<MedicineInformationOutput | null> {
@@ -46,8 +46,7 @@ Based on your knowledge, please provide the following details for this medicine:
 3.  **Usage**: What this medicine is typically used for and its main indications.
 4.  **Dosage Forms**: Common ways this medicine is available (e.g., tablet, capsule, liquid). List them as an array of strings.
 5.  **Common Side Effects**: A list of common side effects associated with this medicine. List them as an array of strings.
-6.  **Image URL (Optional)**: If you can find a publicly accessible, direct URL to an image of the medicine (e.g., a picture of the pill or packaging), provide it. If not, omit this field.
-7.  **Image Hint (Optional)**: If you provide an Image URL, also provide a 1-2 word hint for the image (e.g., "pills capsules", "syrup bottle"). If no Image URL, omit this field.
+6.  **Image Hint**: Provide a 1-2 word hint for an image of the medicine (e.g., "pills capsules", "syrup bottle"). Do not provide a URL.
 
 Return the information structured according to the provided JSON output schema.
 If you cannot find reliable information for the specified medicine, return null for all fields or indicate that the medicine was not found.
@@ -78,8 +77,9 @@ const searchMedicineFlow = ai.defineFlow(
       usage: output.usage || 'Usage information not available.',
       dosageForms: dosageForms,
       commonSideEffects: commonSideEffects,
-      imageUrl: output.imageUrl, // Will be undefined if not provided
-      imageHint: output.imageHint, // Will be undefined if not provided
+      // Always use a placeholder and rely on the hint.
+      imageUrl: `https://placehold.co/600x400.png`,
+      imageHint: output.imageHint || 'medicine',
     };
   }
 );

@@ -9,20 +9,21 @@ interface MedicineInfoCardProps {
 }
 
 export function MedicineInfoCard({ medicine }: MedicineInfoCardProps) {
+  // Always use a placeholder for consistency and to avoid domain errors.
+  const imageUrl = medicine.imageUrl || `https://placehold.co/600x400.png`;
+
   return (
     <Card className="shadow-lg w-full">
       <CardHeader>
-        {medicine.imageUrl && (
-          <div className="relative h-40 w-full mb-4 rounded-t-lg overflow-hidden">
-            <Image
-              src={medicine.imageUrl}
-              alt={medicine.name}
-              layout="fill"
-              objectFit="cover"
-              data-ai-hint={medicine.imageHint || 'medicine pills'}
-            />
-          </div>
-        )}
+        <div className="relative h-40 w-full mb-4 rounded-t-lg overflow-hidden">
+          <Image
+            src={imageUrl}
+            alt={medicine.name}
+            layout="fill"
+            objectFit="cover"
+            data-ai-hint={medicine.imageHint || 'medicine pills'}
+          />
+        </div>
         <div className="flex items-center gap-2">
           <Pill className="h-6 w-6 text-primary" />
           <CardTitle className="font-headline text-xl">{medicine.name}</CardTitle>
