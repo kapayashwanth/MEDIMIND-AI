@@ -12,21 +12,21 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
-export const SuggestMedicineByDiseaseInputSchema = z.object({
+const SuggestMedicineByDiseaseInputSchema = z.object({
   diseases: z.array(z.string()).min(1, 'At least one disease must be provided.'),
 });
-export type SuggestMedicineByDiseaseInput = z.infer<typeof SuggestMedicineByDiseaseInputSchema>;
+type SuggestMedicineByDiseaseInput = z.infer<typeof SuggestMedicineByDiseaseInputSchema>;
 
 const SuggestedMedicationSchema = z.object({
   name: z.string().describe('The name of the suggested medication.'),
   reason: z.string().describe('A brief explanation of why this medication is suggested for the given disease(s).'),
 });
 
-export const SuggestMedicineByDiseaseOutputSchema = z.object({
+const SuggestMedicineByDiseaseOutputSchema = z.object({
   suggestions: z.array(SuggestedMedicationSchema).describe('A list of suggested medications.'),
   disclaimer: z.string().describe('A mandatory disclaimer that this is not medical advice.'),
 });
-export type SuggestMedicineByDiseaseOutput = z.infer<typeof SuggestMedicineByDiseaseOutputSchema>;
+type SuggestMedicineByDiseaseOutput = z.infer<typeof SuggestMedicineByDiseaseOutputSchema>;
 
 
 export async function suggestMedicineByDisease(
