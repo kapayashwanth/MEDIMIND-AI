@@ -1,13 +1,20 @@
 
 'use server';
 
-import { searchMedicine, SearchMedicineInput } from '@/ai/flows/search-medicine-flow';
+import { searchMedicine } from '@/ai/flows/search-medicine-flow';
 import type { Medicine } from '@/types';
 import { z } from 'zod';
 
 const FormSchema = z.object({
   searchTerm: z.string().min(1, "Search term cannot be empty."),
 });
+
+// This type is used by the searchMedicine function.
+// It's defined here because the flow file cannot export types.
+export type SearchMedicineInput = {
+  searchTerm: string;
+};
+
 
 export type SearchMedicineState = {
   message?: string | null;

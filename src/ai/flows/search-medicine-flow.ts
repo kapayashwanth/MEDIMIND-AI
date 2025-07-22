@@ -14,7 +14,7 @@ import type { Medicine as MedicineInformationOutput } from '@/types'; // Use exi
 const SearchMedicineInputSchema = z.object({
   searchTerm: z.string().describe('The name of the medicine to search for.'),
 });
-export type SearchMedicineInput = z.infer<typeof SearchMedicineInputSchema>;
+type SearchMedicineInput = z.infer<typeof SearchMedicineInputSchema>;
 
 // Define a Zod schema that matches the Medicine type from @/types
 // Making imageUrl and imageHint optional as AI might not always find them.
