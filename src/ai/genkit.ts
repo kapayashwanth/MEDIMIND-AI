@@ -25,5 +25,5 @@ export const ai = genkit({
     // when an actual API call is attempted, which should be caught by server actions.
     googleAI({ apiKey: apiKey })
   ],
-  model: 'googleai/gemini-2.0-flash', // Default model to use for ai.generate calls
+  model: 'googleai/gemini-1.5-flash', // Default model to use for ai.generate calls
 });
