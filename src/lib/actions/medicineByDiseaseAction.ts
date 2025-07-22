@@ -14,7 +14,8 @@ const SuggestMedicineByDiseaseInputSchema = z.object({
 // Re-define types needed for the action's state, as they are no longer exported from the flow.
 type SuggestedMedication = {
   name: string;
-  reason: string;
+  frequency: string;
+  sideEffects: string;
 };
 
 type SuggestMedicineByDiseaseOutput = {

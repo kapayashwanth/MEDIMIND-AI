@@ -15,23 +15,22 @@ import { z } from 'zod';
 const SuggestMedicineByDiseaseInputSchema = z.object({
   diseases: z.array(z.string()).min(1, 'At least one disease must be provided.'),
 });
-type SuggestMedicineByDiseaseInput = z.infer<typeof SuggestMedicineByDiseaseInputSchema>;
 
 const SuggestedMedicationSchema = z.object({
-  name: z.string().describe('The name of the suggested medication.'),
-  reason: z.string().describe('A brief explanation of why this medication is suggested for the given disease(s).'),
+  name: z.string().describe('The brand name or generic name of the suggested medication (e.g., Paracetamol, Dolo 650).'),
+  frequency: z.string().describe('The typical frequency for taking the medicine (e.g., "Once a day", "Twice a day after meals").'),
+  sideEffects: z.string().describe('A brief list or summary of common side effects.'),
 });
 
 const SuggestMedicineByDiseaseOutputSchema = z.object({
-  suggestions: z.array(SuggestedMedicationSchema).describe('A list of suggested medications.'),
+  suggestions: z.array(SuggestedMedicationSchema).describe('A list of suggested medications with their details.'),
   disclaimer: z.string().describe('A mandatory disclaimer that this is not medical advice.'),
 });
-type SuggestMedicineByDiseaseOutput = z.infer<typeof SuggestMedicineByDiseaseOutputSchema>;
 
 
 export async function suggestMedicineByDisease(
-  input: SuggestMedicineByDiseaseInput
-): Promise<SuggestMedicineByDiseaseOutput> {
+  input: z.infer<typeof SuggestMedicineByDiseaseInputSchema>
+): Promise<z.infer<typeof SuggestMedicineByDiseaseOutputSchema>> {
   return suggestMedicineByDiseaseFlow(input);
 }
 
@@ -39,14 +38,17 @@ const prompt = ai.definePrompt({
   name: 'suggestMedicineByDiseasePrompt',
   input: { schema: SuggestMedicineByDiseaseInputSchema },
   output: { schema: SuggestMedicineByDiseaseOutputSchema },
-  prompt: `You are a medical information assistant. Based on the following disease(s), suggest potential medications.
+  prompt: `You are a medical information assistant. Based on the following disease(s), suggest common medications, including well-known brand names where applicable (e.g., for Fever, suggest Paracetamol and Dolo 650).
 
 Diseases:
 {{#each diseases}}
 - {{{this}}}
 {{/each}}
 
-For each suggested medication, provide its name and a brief reason for its use in relation to the specified disease(s).
+For each suggested medication, provide:
+1.  **name**: The generic or common brand name of the medicine.
+2.  **frequency**: The typical frequency of intake (e.g., "Twice a day after meals").
+3.  **sideEffects**: A brief summary of common side effects.
 
 Finally, provide a clear and direct disclaimer that this information is for educational purposes only and is not a substitute for professional medical advice. The user must consult a healthcare professional before taking any medication.
 `,
