@@ -1,21 +1,34 @@
 
 'use server';
 
-import { chat, ChatInputSchema, ChatInput } from '@/ai/flows/chatbot-flow';
+import { chat } from '@/ai/flows/chatbot-flow';
+import { z } from 'zod';
 
 export type ChatbotState = {
   response?: string | null;
   error?: string | null;
 };
 
+// Define the schema inside the action file, as it's the only place it's used for validation.
+const ChatInputSchema = z.object({
+  history: z.array(z.object({
+    role: z.enum(['user', 'model']),
+    content: z.array(z.object({ text: z.string() })),
+  })),
+  message: z.string().min(1, "Message cannot be empty."),
+});
+
 export async function chatbotAction(
   prevState: ChatbotState,
   formData: FormData
 ): Promise<ChatbotState> {
-  const history = formData.getAll('history').map(h => JSON.parse(h as string));
+  const history = formData.getAll('history').map(h => {
+      const parsed = JSON.parse(h as string);
+      return { role: parsed.role, content: [{ text: parsed.text }]};
+  });
   
   const validatedFields = ChatInputSchema.safeParse({
-    history: history.map(h => ({ role: h.role, content: [{ text: h.text }] })),
+    history: history,
     message: formData.get('message'),
   });
 
@@ -28,6 +41,7 @@ export async function chatbotAction(
   }
   
   try {
+    // The `chat` function still expects the same input structure, but we don't need to import the type.
     const result = await chat(validatedFields.data);
     return {
       response: result.response,
