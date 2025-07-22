@@ -10,16 +10,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
-// This schema now includes the isUser boolean for the prompt
-const ChatPromptInputSchema = z.object({
-  history: z.array(z.object({
-    isUser: z.boolean(),
-    text: z.string(),
-  })),
-  message: z.string().describe('The latest message from the user.'),
-});
-
-// The public-facing function still uses the original, simpler input structure
+// Input schema for the public-facing 'chat' function
 const ChatInputSchema = z.object({
   history: z.array(z.object({
     role: z.enum(['user', 'model']),
@@ -29,6 +20,16 @@ const ChatInputSchema = z.object({
 });
 type ChatInput = z.infer<typeof ChatInputSchema>;
 
+// Input schema for the internal prompt, which needs the isUser boolean
+const ChatPromptInputSchema = z.object({
+  history: z.array(z.object({
+    isUser: z.boolean(),
+    text: z.string(),
+  })),
+  message: z.string().describe('The latest message from the user.'),
+});
+
+// Output schema for both the flow and the public function
 const ChatOutputSchema = z.object({
   response: z.string().describe('The AI model\'s response to the user.'),
 });
@@ -36,7 +37,7 @@ type ChatOutput = z.infer<typeof ChatOutputSchema>;
 
 
 export async function chat(input: ChatInput): Promise<ChatOutput> {
-  // Map the input to the structure the prompt now expects
+  // Map the public input to the structure the prompt expects
   const promptInput = {
     history: input.history.map(h => ({
       isUser: h.role === 'user',

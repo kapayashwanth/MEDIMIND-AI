@@ -9,7 +9,7 @@ export type ChatbotState = {
   error?: string | null;
 };
 
-// Define the schema inside the action file, as it's the only place it's used for validation.
+// Define the schema for form validation inside the action file.
 const FormInputSchema = z.object({
   history: z.array(z.string()), // History comes as stringified JSON from hidden inputs
   message: z.string().min(1, "Message cannot be empty."),
@@ -32,7 +32,7 @@ export async function chatbotAction(
     };
   }
   
-  // The AI flow expects a specific structure. We construct it here.
+  // The AI flow expects a specific structure for history. We construct it here.
   const historyForAI = validatedFields.data.history.map(h => {
       const parsed = JSON.parse(h);
       return { role: parsed.role, content: [{ text: parsed.text }]};
