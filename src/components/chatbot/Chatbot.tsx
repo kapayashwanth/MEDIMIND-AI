@@ -75,12 +75,10 @@ export function Chatbot() {
   };
   
   const handlePreloadClick = (message: string) => {
-    const newFormData = new FormData();
-    newFormData.append('message', message);
-    // When a preloaded message is clicked, the history is empty
-    messages.forEach(msg => {
-       newFormData.append('history', JSON.stringify(msg));
-    });
+    // When a preloaded message is clicked, we construct the FormData
+    // and submit it programmatically.
+    const newFormData = new FormData(formRef.current!); // Get existing hidden inputs from form
+    newFormData.set('message', message); // Set the clicked message
     handleFormSubmit(newFormData);
   }
 
