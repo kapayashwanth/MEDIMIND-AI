@@ -51,6 +51,12 @@ export async function chatbotAction(
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    if (errorMessage.includes('503') || errorMessage.toLowerCase().includes('overloaded')) {
+      return {
+        error: 'The AI assistant is currently overloaded. Please try again in a few moments.',
+        response: null,
+      };
+    }
     return {
       error: `Server error: ${errorMessage}`,
       response: null,

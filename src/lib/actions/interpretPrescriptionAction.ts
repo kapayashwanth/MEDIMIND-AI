@@ -39,8 +39,13 @@ export async function interpretPrescriptionAction(
 
   try {
     const result = await interpretPrescription(input);
-    // A successful response can include an empty array of analysis results.
     if (result && result.analysis !== undefined) {
+      if (result.analysis.length === 0) {
+        return {
+          message: 'No conditions or medications could be identified from the prescription. Please ensure the document is clear.',
+          data: result,
+        };
+      }
       return {
         message: 'Prescription interpreted successfully.',
         data: result,
@@ -55,6 +60,13 @@ export async function interpretPrescriptionAction(
   } catch (error) {
     console.error('Error interpreting prescription:', error);
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+     if (errorMessage.includes('503') || errorMessage.toLowerCase().includes('overloaded')) {
+      return {
+        message: 'The AI model is currently overloaded. Please try again in a few moments.',
+        errors: { server: ['Model overloaded'] },
+        data: null,
+      };
+    }
     return {
       message: `Server error: ${errorMessage}`,
       errors: { server: [errorMessage] },

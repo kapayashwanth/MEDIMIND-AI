@@ -6,12 +6,10 @@ import {
 } from '@/ai/flows/medicine-by-disease-flow';
 import { z } from 'zod';
 
-// Define the schema inside the action file, as it's the only place it's used for validation.
 const SuggestMedicineByDiseaseInputSchema = z.object({
   diseases: z.array(z.string()).min(1, 'At least one disease must be provided.'),
 });
 
-// Re-define types needed for the action's state, as they are no longer exported from the flow.
 type SuggestedMedication = {
   name: string;
   frequency: string;
@@ -48,8 +46,6 @@ export async function suggestMedicineByDiseaseAction(
     };
   }
 
-  // The 'suggestMedicineByDisease' function still expects the same input structure,
-  // we just don't need to import the type explicitly anymore.
   const input = {
     diseases: validatedFields.data.diseases,
   };
@@ -62,6 +58,13 @@ export async function suggestMedicineByDiseaseAction(
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    if (errorMessage.includes('503') || errorMessage.toLowerCase().includes('overloaded')) {
+      return {
+        message: 'The AI model is currently overloaded. Please try again in a few moments.',
+        errors: { server: ['Model overloaded'] },
+        data: null,
+      };
+    }
     return {
       message: `Server error: ${errorMessage}`,
       errors: { server: [errorMessage] },

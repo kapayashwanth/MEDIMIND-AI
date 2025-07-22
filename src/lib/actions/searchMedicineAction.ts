@@ -1,3 +1,4 @@
+
 'use server';
 
 import { searchMedicine, SearchMedicineInput } from '@/ai/flows/search-medicine-flow';
@@ -54,6 +55,13 @@ export async function searchMedicineAction(
  {
     console.error('Error searching medicine:', error);
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred while searching for medicine.';
+    if (errorMessage.includes('503') || errorMessage.toLowerCase().includes('overloaded')) {
+      return {
+        message: 'The AI model is currently overloaded. Please try again in a few moments.',
+        errors: { server: ['Model overloaded'] },
+        data: null,
+      };
+    }
     return {
       message: `Server error: ${errorMessage}`,
       errors: { server: [errorMessage] },

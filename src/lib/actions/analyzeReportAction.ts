@@ -66,6 +66,13 @@ export async function analyzeReportAction(
   } catch (error) {
     console.error('Error analyzing report:', error);
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    if (errorMessage.includes('503') || errorMessage.toLowerCase().includes('overloaded')) {
+      return {
+        message: 'The AI model is currently overloaded. Please try again in a few moments.',
+        errors: { server: ['Model overloaded'] },
+        data: null,
+      };
+    }
     return {
       message: `Server error: ${errorMessage}`,
       errors: { server: [errorMessage] },
