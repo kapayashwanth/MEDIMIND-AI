@@ -120,9 +120,7 @@ export default function ReportAnalysisPage() {
       });
       pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
       
-      const pdfFileName = reportFile?.name.endsWith('.pdf') 
-        ? `${reportFile.name.replace(/\.pdf$/i, '')}_Analysis.pdf` 
-        : 'MediMind_AI_Analysis.pdf';
+      const pdfFileName = 'MediMind_AI_Analysis.pdf';
       pdf.save(pdfFileName);
 
     } catch (error) {
@@ -286,7 +284,7 @@ export default function ReportAnalysisPage() {
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle className="font-headline text-2xl">Analysis Results</CardTitle>
-                <Button variant="outline" size="sm" onClick={handleDownloadReport} disabled={!reportFile && !reportDataUri}>
+                <Button variant="outline" size="sm" onClick={handleDownloadReport}>
                   <Download className="mr-2 h-4 w-4" />
                   Download Analysis
                 </Button>
