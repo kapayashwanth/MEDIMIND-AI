@@ -39,9 +39,8 @@ export async function interpretPrescriptionAction(
 
   try {
     const result = await interpretPrescription(input);
-    // A successful response can include an empty array of medications.
-    // The check should be for a valid `result` object, not whether it contains items.
-    if (result && result.medications !== undefined) {
+    // A successful response can include an empty array of analysis results.
+    if (result && result.analysis !== undefined) {
       return {
         message: 'Prescription interpreted successfully.',
         data: result,

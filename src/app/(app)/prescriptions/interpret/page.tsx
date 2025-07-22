@@ -164,38 +164,45 @@ export default function InterpretPrescriptionPage() {
           </form>
         </Card>
 
-        {state.data && state.data.medications && (
+        {state.data && state.data.analysis && (
           <Card className="max-w-2xl mx-auto mt-8 shadow-xl" ref={resultsRef}>
             <CardHeader>
               <div className="flex justify-between items-center">
-                <CardTitle className="font-headline text-2xl">Prescription Details</CardTitle>
+                <CardTitle className="font-headline text-2xl">Prescription Summary</CardTitle>
                 <Button variant="outline" size="sm" onClick={handleDownloadPdf}>
                   <Download className="mr-2 h-4 w-4" />
                   Download PDF
                 </Button>
               </div>
             </CardHeader>
-            <CardContent>
-              {state.data.medications.length > 0 ? (
-                <Accordion type="single" collapsible className="w-full" defaultValue="item-0">
-                  {state.data.medications.map((med, index) => (
-                    <AccordionItem value={`item-${index}`} key={index}>
-                      <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                        <div className="flex items-center gap-2">
-                          <Pill className="h-5 w-5 text-primary" /> 
-                          {med.name || 'Unnamed Medication'}
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="space-y-3 pl-2 pr-2 pt-2">
-                        <DetailItem icon={HeartPulse} label="Likely For Disease" value={(med as any).expectedDisease} />
-                        <DetailItem icon={Target} label="Purpose / Indication" value={med.purpose} />
-                        <DetailItem icon={SideEffectsIcon} label="Common Side Effects" value={med.commonSideEffects} />
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
+            <CardContent className="space-y-6">
+              {state.data.analysis.length > 0 ? (
+                state.data.analysis.map((diseaseGroup, groupIndex) => (
+                  <div key={groupIndex} className="space-y-3">
+                    <h3 className="flex items-center gap-2 text-lg font-semibold text-primary">
+                      <HeartPulse className="h-6 w-6" />
+                      Likely Condition: {diseaseGroup.expectedDisease}
+                    </h3>
+                    <Accordion type="single" collapsible className="w-full" defaultValue="item-0">
+                      {diseaseGroup.medications.map((med, medIndex) => (
+                        <AccordionItem value={`item-${medIndex}`} key={medIndex}>
+                          <AccordionTrigger className="text-base font-semibold hover:no-underline">
+                            <div className="flex items-center gap-2">
+                              <Pill className="h-5 w-5" /> 
+                              {med.name || 'Unnamed Medication'}
+                            </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="space-y-3 pl-2 pr-2 pt-2">
+                            <DetailItem icon={Target} label="Purpose / Indication" value={med.purpose} />
+                            <DetailItem icon={SideEffectsIcon} label="Common Side Effects" value={med.commonSideEffects} />
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  </div>
+                ))
               ) : (
-                <p className="text-muted-foreground">No medications found or prescription could not be fully interpreted.</p>
+                <p className="text-muted-foreground text-center">No conditions or medications could be identified from the prescription.</p>
               )}
             </CardContent>
             <CardFooter>

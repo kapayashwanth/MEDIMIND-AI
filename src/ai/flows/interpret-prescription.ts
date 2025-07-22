@@ -27,11 +27,15 @@ const MedicationDetailsSchema = z.object({
   name: z.string().describe('The name of the medication, extracted from the prescription document.'),
   purpose: z.string().describe('Based on general medical knowledge: The primary purpose or indication for the medication. Be specific.'),
   commonSideEffects: z.string().describe('Based on general medical knowledge: A list or summary of key common side effects associated with the medication.'),
-  expectedDisease: z.string().describe('Based on the medication and its purpose, what is the likely disease or condition it is prescribed for (e.g., "Hypertension", "Type 2 Diabetes", "Bacterial Infection").'),
+});
+
+const DiseaseMedicationsSchema = z.object({
+    expectedDisease: z.string().describe('Based on the medications, what is the likely disease or condition they are prescribed for (e.g., "Hypertension", "Type 2 Diabetes", "Bacterial Infection").'),
+    medications: z.array(MedicationDetailsSchema).describe('An array of medications prescribed for this disease.'),
 });
 
 const InterpretPrescriptionOutputSchema = z.object({
-  medications: z.array(MedicationDetailsSchema).describe('An array of medications with their details.'),
+  analysis: z.array(DiseaseMedicationsSchema).describe('An array of diseases, each with a list of associated medications.'),
 });
 export type InterpretPrescriptionOutput = z.infer<typeof InterpretPrescriptionOutputSchema>;
 
@@ -44,16 +48,18 @@ const prompt = ai.definePrompt({
   input: {schema: InterpretPrescriptionInputSchema},
   output: {schema: InterpretPrescriptionOutputSchema},
   prompt: `You are a medical expert specializing in interpreting prescriptions and providing drug information.
-Analyze the following prescription document. For each medication identified:
+Analyze the following prescription document. Group the identified medications by the likely disease they treat.
 
-1.  **Medication Name**: Extract the name of the medication *from the document*.
-2.  **Purpose/Indication**: Based on your **general medical knowledge** of the identified medication, describe its primary purpose(s) or indication(s).
-3.  **Common Side Effects**: Based on your **general medical knowledge**, list its key common side effects.
-4.  **Expected Disease**: Based on the medication and its purpose, infer the likely **disease or condition** it is prescribed to treat (e.g., "Hypertension", "Type 2 Diabetes", "Bacterial Infection").
+1.  **Group by Disease**: For each likely disease or condition (e.g., "Hypertension", "Type 2 Diabetes"), create a grouping.
+2.  **List Medications**: Within each disease group, list all the medications prescribed for it.
+3.  **Provide Details**: For each medication, provide:
+    *   \\\`name\\\`: The name of the medication *from the document*.
+    *   \\\`purpose\\\`: Its primary purpose or indication.
+    *   \\\`commonSideEffects\\\`: Its key common side effects.
 
 Prescription: {{media url=prescriptionDataUri}}
 
-Return the information structured according to the provided JSON schema. Ensure all fields are populated for each medication. If a medication name cannot be reliably extracted, do not include an entry for it.`,
+Return the information structured according to the provided JSON schema, with an array of diseases, each containing its list of medications.`,
 });
 
 const interpretPrescriptionFlow = ai.defineFlow(
@@ -64,16 +70,18 @@ const interpretPrescriptionFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    if (!output || !output.medications) {
-        return { medications: [] };
+    if (!output || !output.analysis) {
+        return { analysis: [] };
     }
     // Ensure all required fields have a default value if not provided by AI
-    const processedMedications = output.medications.map(med => ({
-        name: med.name || 'Unnamed Medication',
-        purpose: med.purpose || 'Purpose not determined by AI.',
-        commonSideEffects: med.commonSideEffects || 'Side effects not determined by AI.',
-        expectedDisease: med.expectedDisease || 'Expected disease not determined by AI.',
+    const processedAnalysis = output.analysis.map(diseaseGroup => ({
+        expectedDisease: diseaseGroup.expectedDisease || 'Undetermined Condition',
+        medications: diseaseGroup.medications.map(med => ({
+            name: med.name || 'Unnamed Medication',
+            purpose: med.purpose || 'Purpose not determined by AI.',
+            commonSideEffects: med.commonSideEffects || 'Side effects not determined by AI.',
+        }))
     }));
-    return { medications: processedMedications };
+    return { analysis: processedAnalysis };
   }
 );
