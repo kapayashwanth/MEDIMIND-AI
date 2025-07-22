@@ -5,13 +5,12 @@
  * @fileOverview An AI agent that suggests medications based on a list of diseases.
  *
  * - suggestMedicineByDisease - A function that handles fetching medicine suggestions.
- * - SuggestMedicineByDiseaseInput - The input type for the suggestMedicineByDisease function.
- * - SuggestMedicineByDiseaseOutput - The return type for the suggestMedicineByDisease function.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
+// Input schema is now internal to this file
 const SuggestMedicineByDiseaseInputSchema = z.object({
   diseases: z.array(z.string()).min(1, 'At least one disease must be provided.'),
 });
@@ -22,15 +21,20 @@ const SuggestedMedicationSchema = z.object({
   sideEffects: z.string().describe('A brief list or summary of common side effects.'),
 });
 
+// Output schema is now internal to this file
 const SuggestMedicineByDiseaseOutputSchema = z.object({
   suggestions: z.array(SuggestedMedicationSchema).describe('A list of suggested medications with their details.'),
   disclaimer: z.string().describe('A mandatory disclaimer that this is not medical advice.'),
 });
 
+// Type aliases for internal use
+type SuggestMedicineByDiseaseInput = z.infer<typeof SuggestMedicineByDiseaseInputSchema>;
+type SuggestMedicineByDiseaseOutput = z.infer<typeof SuggestMedicineByDiseaseOutputSchema>;
+
 
 export async function suggestMedicineByDisease(
-  input: z.infer<typeof SuggestMedicineByDiseaseInputSchema>
-): Promise<z.infer<typeof SuggestMedicineByDiseaseOutputSchema>> {
+  input: SuggestMedicineByDiseaseInput
+): Promise<SuggestMedicineByDiseaseOutput> {
   return suggestMedicineByDiseaseFlow(input);
 }
 

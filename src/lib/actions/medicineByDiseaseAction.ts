@@ -10,6 +10,7 @@ const SuggestMedicineByDiseaseInputSchema = z.object({
   diseases: z.array(z.string()).min(1, 'At least one disease must be provided.'),
 });
 
+// Define types here as they are no longer exported from the flow file
 type SuggestedMedication = {
   name: string;
   frequency: string;
@@ -20,6 +21,8 @@ type SuggestMedicineByDiseaseOutput = {
   suggestions: SuggestedMedication[];
   disclaimer: string;
 };
+
+type SuggestMedicineByDiseaseInput = z.infer<typeof SuggestMedicineByDiseaseInputSchema>;
 
 export type SuggestMedicineState = {
   message?: string | null;
@@ -46,7 +49,7 @@ export async function suggestMedicineByDiseaseAction(
     };
   }
 
-  const input = {
+  const input: SuggestMedicineByDiseaseInput = {
     diseases: validatedFields.data.diseases,
   };
 
