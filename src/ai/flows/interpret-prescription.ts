@@ -21,7 +21,7 @@ const InterpretPrescriptionInputSchema = z.object({
       "A prescription document, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
 });
-export type InterpretPrescriptionInput = z.infer<typeof InterpretPrescriptionInputSchema>;
+type InterpretPrescriptionInput = z.infer<typeof InterpretPrescriptionInputSchema>;
 
 const MedicationDetailsSchema = z.object({
   name: z.string().describe('The name of the medication, extracted from the prescription document.'),
@@ -37,7 +37,7 @@ const DiseaseMedicationsSchema = z.object({
 const InterpretPrescriptionOutputSchema = z.object({
   analysis: z.array(DiseaseMedicationsSchema).describe('An array of diseases, each with a list of associated medications.'),
 });
-export type InterpretPrescriptionOutput = z.infer<typeof InterpretPrescriptionOutputSchema>;
+type InterpretPrescriptionOutput = z.infer<typeof InterpretPrescriptionOutputSchema>;
 
 export async function interpretPrescription(input: InterpretPrescriptionInput): Promise<InterpretPrescriptionOutput> {
   return interpretPrescriptionFlow(input);

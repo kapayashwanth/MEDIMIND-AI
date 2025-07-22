@@ -1,12 +1,30 @@
 
 'use server';
 
-import { interpretPrescription, InterpretPrescriptionInput, InterpretPrescriptionOutput } from '@/ai/flows/interpret-prescription';
+import { interpretPrescription } from '@/ai/flows/interpret-prescription';
 import { z } from 'zod';
 
 const FormSchema = z.object({
   prescriptionDataUri: z.string().min(1, "Prescription file is required."),
 });
+
+// Re-define types here as they are no longer exported from the flow file
+type MedicationDetails = {
+    name: string;
+    purpose: string;
+    commonSideEffects: string;
+};
+
+type DiseaseMedications = {
+    expectedDisease: string;
+    medications: MedicationDetails[];
+};
+
+type InterpretPrescriptionOutput = {
+    analysis: DiseaseMedications[];
+};
+
+type InterpretPrescriptionInput = z.infer<typeof FormSchema>;
 
 export type InterpretPrescriptionState = {
   message?: string | null;

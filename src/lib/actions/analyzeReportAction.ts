@@ -1,7 +1,7 @@
 
 'use server';
 
-import { analyzeMedicalReport, AnalyzeMedicalReportInput, AnalyzeMedicalReportOutput } from '@/ai/flows/analyze-medical-report';
+import { analyzeMedicalReport } from '@/ai/flows/analyze-medical-report';
 import { z } from 'zod';
 
 const FormSchema = z.object({
@@ -10,6 +10,26 @@ const FormSchema = z.object({
   age: z.string().optional(),
   gender: z.string().optional(),
 });
+
+// Re-define types here as they are no longer exported from the flow file
+type TestResultItem = {
+  testName: string;
+  patientValue: string;
+  normalRangeOrExpected: string;
+  unit?: string;
+  status: 'normal' | 'low' | 'high' | 'watch' | 'danger' | 'info';
+  interpretation?: string;
+};
+
+type AnalyzeMedicalReportOutput = {
+  overallRiskAssessment: string;
+  keyFindingsSummary: string;
+  detailedTestResults?: TestResultItem[];
+  conciseSummary: string;
+  personalizedRecommendations: string;
+};
+
+type AnalyzeMedicalReportInput = z.infer<typeof FormSchema>;
 
 export type AnalyzeReportState = {
   message?: string | null;

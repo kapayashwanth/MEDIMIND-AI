@@ -28,7 +28,7 @@ const AnalyzeMedicalReportInputSchema = z.object({
   age: z.string().optional().describe("The patient's age."),
   gender: z.string().optional().describe("The patient's gender (e.g., Male, Female, Other)."),
 });
-export type AnalyzeMedicalReportInput = z.infer<typeof AnalyzeMedicalReportInputSchema>;
+type AnalyzeMedicalReportInput = z.infer<typeof AnalyzeMedicalReportInputSchema>;
 
 const TestResultItemSchema = z.object({
   testName: z.string().describe('The name of the medical test or observation (e.g., "Hemoglobin", "Glucose Fasting", "Chest X-Ray Finding").'),
@@ -39,7 +39,7 @@ const TestResultItemSchema = z.object({
     .describe("Status of the finding: 'normal' (implies within expected range), 'watch' (for borderline or mildly abnormal findings needing observation), 'danger' (for significantly abnormal or critical findings), 'low' (value is significantly low), 'high' (value is significantly high), 'info' (for general qualitative observations that aren't specific deviations but part of the report)."),
   interpretation: z.string().optional().describe("A very concise interpretation if the status is not 'normal' or 'info'. Max 1-2 short sentences.")
 });
-export type TestResultItem = z.infer<typeof TestResultItemSchema>;
+type TestResultItem = z.infer<typeof TestResultItemSchema>;
 
 const AnalyzeMedicalReportOutputSchema = z.object({
   overallRiskAssessment: z
@@ -58,7 +58,7 @@ const AnalyzeMedicalReportOutputSchema = z.object({
     .string()
     .describe('Concise, actionable health recommendations (2-3 short bullet points max or a brief paragraph) based on the report, patient information, and risk assessment. Focus on next steps or questions for a doctor.'),
 });
-export type AnalyzeMedicalReportOutput = z.infer<typeof AnalyzeMedicalReportOutputSchema>;
+type AnalyzeMedicalReportOutput = z.infer<typeof AnalyzeMedicalReportOutputSchema>;
 
 export async function analyzeMedicalReport(
   input: AnalyzeMedicalReportInput
@@ -138,4 +138,3 @@ const analyzeMedicalReportFlow = ai.defineFlow(
     };
   }
 );
-
