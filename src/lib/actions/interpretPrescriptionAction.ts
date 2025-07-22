@@ -39,15 +39,17 @@ export async function interpretPrescriptionAction(
 
   try {
     const result = await interpretPrescription(input);
-     if (result && result.medications) {
+    // A successful response can include an empty array of medications.
+    // The check should be for a valid `result` object, not whether it contains items.
+    if (result && result.medications !== undefined) {
       return {
         message: 'Prescription interpreted successfully.',
         data: result,
       };
     } else {
       return {
-        message: 'AI analysis returned incomplete data. Please try again.',
-        errors: { server: ['AI analysis returned incomplete data.'] },
+        message: 'AI analysis returned an invalid response. Please try again.',
+        errors: { server: ['AI analysis returned an invalid response.'] },
         data: null,
       };
     }
