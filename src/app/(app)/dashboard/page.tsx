@@ -13,7 +13,7 @@ export default function DashboardPage() {
         <div className="mb-8">
           <h2 className="font-headline text-3xl font-semibold text-foreground mb-2">Welcome to MediMind AI</h2>
           <p className="text-muted-foreground">
-            Your intelligent medical assistant for analyzing reports, interpreting prescriptions, and finding medicine information.
+            Your intelligent assistant for understanding your health.
           </p>
         </div>
 
@@ -25,11 +25,11 @@ export default function DashboardPage() {
                 <CardTitle className="font-headline">Report Analysis</CardTitle>
               </div>
               <CardDescription>
-                Upload medical test reports like X-rays or MRIs for AI-powered key finding highlights.
+                Upload medical reports for AI-powered analysis.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Link href="/reports/analysis" asChild>
+              <Link href="/reports/analysis" passHref>
                 <Button className="w-full" variant="default">Analyze a Report</Button>
               </Link>
             </CardContent>
@@ -42,11 +42,11 @@ export default function DashboardPage() {
                 <CardTitle className="font-headline">Prescription Interpretation</CardTitle>
               </div>
               <CardDescription>
-                Interpret prescriptions to understand medication details, usage, and intake timings.
+                Interpret prescriptions to understand medications.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Link href="/prescriptions/interpret" asChild>
+              <Link href="/prescriptions/interpret" passHref>
                 <Button className="w-full" variant="default">Interpret Prescription</Button>
               </Link>
             </CardContent>
@@ -59,11 +59,11 @@ export default function DashboardPage() {
                 <CardTitle className="font-headline">Medicine Search</CardTitle>
               </div>
               <CardDescription>
-                Search for medicines by name to find detailed information about their recommended usage.
+                Search for medicines to find detailed information.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Link href="/medicines/search" asChild>
+              <Link href="/medicines/search" passHref>
                 <Button className="w-full" variant="default">Search Medicines</Button>
               </Link>
             </CardContent>
@@ -76,11 +76,11 @@ export default function DashboardPage() {
                 <CardTitle className="font-headline">Medicine by Disease</CardTitle>
               </div>
               <CardDescription>
-                Enter a disease to get AI-powered suggestions for relevant medications.
+                Get medication suggestions based on diseases.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Link href="/medicines/by-disease" asChild>
+              <Link href="/medicines/by-disease" passHref>
                 <Button className="w-full" variant="default">Get Suggestions</Button>
               </Link>
             </CardContent>
@@ -93,11 +93,11 @@ export default function DashboardPage() {
                 <CardTitle className="font-headline">Book Appointment</CardTitle>
               </div>
               <CardDescription>
-                Find doctors from various hospitals and book an appointment.
+                Schedule a visit with a doctor from various hospitals.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Link href="/appointments/book" asChild>
+              <Link href="/appointments/book" passHref>
                 <Button className="w-full" variant="default">Book Now</Button>
               </Link>
             </CardContent>
@@ -110,7 +110,7 @@ export default function DashboardPage() {
                 <CardTitle className="font-headline">Analysis History</CardTitle>
               </div>
               <CardDescription>
-                View your past analyses and interpretations. (Feature coming soon)
+                View your past analyses. (Coming Soon)
               </CardDescription>
             </CardHeader>
             <CardContent>

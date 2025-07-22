@@ -3,6 +3,7 @@
 
 import { useState, ChangeEvent, useActionState, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
+import Image from 'next/image';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -15,14 +16,12 @@ import type { TestResultItem } from '@/ai/flows/analyze-medical-report';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { 
     FileUp, AlertCircle, CheckCircle2, Download, User, Users, FileText as ReportIcon,
-    AlertOctagon, Activity, Info, ListChecks, ArrowDownCircle, ArrowUpCircle, CheckCircle
+    AlertOctagon, Activity, Info, ListChecks, ArrowDownCircle, ArrowUpCircle, CheckCircle, FileText
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-
 
 const initialState: AnalyzeReportState = {
   message: null,
@@ -43,6 +42,7 @@ export default function ReportAnalysisPage() {
   const [state, formAction] = useActionState(analyzeReportAction, initialState);
   const [reportFile, setReportFile] = useState<File | null>(null);
   const [reportDataUri, setReportDataUri] = useState<string>('');
+  const [previewUrl, setPreviewUrl] = useState<string>('');
   const [fileName, setFileName] = useState<string>('');
   const resultsRef = useRef<HTMLDivElement>(null);
 
@@ -51,16 +51,22 @@ export default function ReportAnalysisPage() {
     if (file) {
       setReportFile(file);
       setFileName(file.name);
+      
       const reader = new FileReader();
       reader.onload = (e) => {
-        if (e.target?.result) {
-          setReportDataUri(e.target.result as string);
+        const dataUri = e.target?.result as string;
+        setReportDataUri(dataUri);
+        if (file.type.startsWith('image/')) {
+          setPreviewUrl(dataUri);
+        } else {
+          setPreviewUrl(''); // It's not an image, clear any previous preview
         }
       };
       reader.readAsDataURL(file);
     } else {
       setReportFile(null);
       setReportDataUri('');
+      setPreviewUrl('');
       setFileName('');
     }
   };
@@ -121,7 +127,6 @@ export default function ReportAnalysisPage() {
 
     } catch (error) {
       console.error("Error generating PDF:", error);
-      // TODO: Show user-friendly error (e.g., using toast)
     } finally {
       if (tempImageContainer && tempImageContainer.parentNode === inputElement) {
         inputElement.removeChild(tempImageContainer);
@@ -202,7 +207,20 @@ export default function ReportAnalysisPage() {
                         <Input id="reportFile" name="reportFile" type="file" className="hidden" onChange={handleFileChange} accept="image/*,application/pdf" />
                     </label>
                 </div>
-                {fileName && <p className="text-sm text-muted-foreground mt-2">Selected file: {fileName}</p>}
+
+                {previewUrl && (
+                    <div className="mt-4">
+                        <Image src={previewUrl} alt="Report preview" width={500} height={300} className="rounded-lg object-contain mx-auto border" />
+                    </div>
+                )}
+                
+                {fileName && !previewUrl && (
+                  <div className="mt-4 flex items-center justify-center text-muted-foreground bg-muted/50 p-4 rounded-lg">
+                    <FileText className="h-6 w-6 mr-2" />
+                    <p className="text-sm font-medium">Selected file: {fileName}</p>
+                  </div>
+                )}
+
                 <input type="hidden" name="reportDataUri" value={reportDataUri} />
                 {state.errors?.reportDataUri && (
                   <p className="text-sm font-medium text-destructive">{state.errors.reportDataUri[0]}</p>

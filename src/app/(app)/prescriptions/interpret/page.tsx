@@ -3,6 +3,7 @@
 
 import { useState, ChangeEvent, useActionState, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
+import Image from 'next/image';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -14,7 +15,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { 
   FileUp, AlertCircle, CheckCircle2, Pill, Target, Download,
-  AlertTriangle as SideEffectsIcon
+  AlertTriangle as SideEffectsIcon, FileText
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -39,6 +40,7 @@ export default function InterpretPrescriptionPage() {
   const [state, formAction] = useActionState(interpretPrescriptionAction, initialState);
   const [prescriptionFile, setPrescriptionFile] = useState<File | null>(null);
   const [prescriptionDataUri, setPrescriptionDataUri] = useState<string>('');
+  const [previewUrl, setPreviewUrl] = useState<string>('');
   const [fileName, setFileName] = useState<string>('');
   const resultsRef = useRef<HTMLDivElement>(null);
 
@@ -47,10 +49,15 @@ export default function InterpretPrescriptionPage() {
     if (file) {
       setPrescriptionFile(file);
       setFileName(file.name);
+      
       const reader = new FileReader();
       reader.onload = (e) => {
-        if (e.target?.result) {
-          setPrescriptionDataUri(e.target.result as string);
+        const dataUri = e.target?.result as string;
+        setPrescriptionDataUri(dataUri);
+        if(file.type.startsWith('image/')) {
+          setPreviewUrl(dataUri);
+        } else {
+          setPreviewUrl(''); // It's not an image, clear any previous preview
         }
       };
       reader.readAsDataURL(file);
@@ -58,6 +65,7 @@ export default function InterpretPrescriptionPage() {
       setPrescriptionFile(null);
       setPrescriptionDataUri('');
       setFileName('');
+      setPreviewUrl('');
     }
   };
 
@@ -123,7 +131,20 @@ export default function InterpretPrescriptionPage() {
                         <Input id="prescriptionFile" name="prescriptionFile" type="file" className="hidden" onChange={handleFileChange} accept="image/*,application/pdf" />
                     </label>
                 </div>
-                {fileName && <p className="text-sm text-muted-foreground mt-2">Selected file: {fileName}</p>}
+
+                {previewUrl && (
+                    <div className="mt-4">
+                        <Image src={previewUrl} alt="Prescription preview" width={500} height={300} className="rounded-lg object-contain mx-auto border" />
+                    </div>
+                )}
+                
+                {fileName && !previewUrl && (
+                  <div className="mt-4 flex items-center justify-center text-muted-foreground bg-muted/50 p-4 rounded-lg">
+                    <FileText className="h-6 w-6 mr-2" />
+                    <p className="text-sm font-medium">Selected file: {fileName}</p>
+                  </div>
+                )}
+                
                 <input type="hidden" name="prescriptionDataUri" value={prescriptionDataUri} />
                 {state.errors?.prescriptionDataUri && (
                   <p className="text-sm font-medium text-destructive">{state.errors.prescriptionDataUri[0]}</p>

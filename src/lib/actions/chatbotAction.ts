@@ -8,29 +8,21 @@ export type ChatbotState = {
   error?: string | null;
 };
 
-// Helper to parse message history from FormData
-const parseHistory = (formData: FormData): ChatInput['history'] => {
-    return formData.getAll('history').map(h => {
-        const parsed = JSON.parse(h as string);
-        return {
-            role: parsed.role,
-            content: [{ text: parsed.text }]
-        }
-    });
-}
-
 export async function chatbotAction(
   prevState: ChatbotState,
   formData: FormData
 ): Promise<ChatbotState> {
+  const history = formData.getAll('history').map(h => JSON.parse(h as string));
+  
   const validatedFields = ChatInputSchema.safeParse({
-    history: parseHistory(formData),
+    history: history.map(h => ({ role: h.role, content: [{ text: h.text }] })),
     message: formData.get('message'),
   });
 
   if (!validatedFields.success) {
+    const errorMessage = validatedFields.error.flatten().fieldErrors.message?.[0] || 'Invalid input.';
     return {
-      error: "Invalid input. " + validatedFields.error.flatten().fieldErrors.message?.[0],
+      error: errorMessage,
       response: null,
     };
   }
