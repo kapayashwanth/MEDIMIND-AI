@@ -3,7 +3,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { FileScan, ScrollText, Pill, BarChart3 } from 'lucide-react';
+import { FileScan, ScrollText, Pill, BarChart3, CalendarPlus, Search } from 'lucide-react';
 
 export default function DashboardPage() {
   return (
@@ -69,7 +69,41 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
           
-          <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 md:col-span-2 lg:col-span-1">
+           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardHeader>
+              <div className="flex items-center gap-3 mb-2">
+                <Search className="h-8 w-8 text-primary" />
+                <CardTitle className="font-headline">Medicine by Disease</CardTitle>
+              </div>
+              <CardDescription>
+                Enter a disease to get AI-powered suggestions for relevant medications.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link href="/medicines/by-disease" asChild>
+                <Button className="w-full" variant="default">Get Suggestions</Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardHeader>
+              <div className="flex items-center gap-3 mb-2">
+                <CalendarPlus className="h-8 w-8 text-primary" />
+                <CardTitle className="font-headline">Book Appointment</CardTitle>
+              </div>
+              <CardDescription>
+                Find doctors from various hospitals and book an appointment.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link href="/appointments/book" asChild>
+                <Button className="w-full" variant="default">Book Now</Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
             <CardHeader>
                <div className="flex items-center gap-3 mb-2">
                 <BarChart3 className="h-8 w-8 text-primary" />
@@ -88,4 +122,3 @@ export default function DashboardPage() {
     </>
   );
 }
-

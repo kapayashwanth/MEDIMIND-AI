@@ -12,6 +12,7 @@ import { SidebarNav } from '@/components/layout/SidebarNav';
 import { AppLogo } from '@/components/layout/AppLogo';
 import { Button } from '@/components/ui/button';
 import { Moon, Sun, X } from 'lucide-react'; // Added X icon
+import { Chatbot } from '@/components/chatbot/Chatbot';
 // import { ModeToggle } from '@/components/ModeToggle'; // Assuming you might add this later
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -38,6 +39,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <SidebarInset>
         <div className="flex min-h-screen w-full flex-col">
           {children}
+          <Chatbot />
         </div>
       </SidebarInset>
     </SidebarProvider>
