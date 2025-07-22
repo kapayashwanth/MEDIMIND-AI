@@ -10,11 +10,8 @@ export type ChatbotState = {
 };
 
 // Define the schema inside the action file, as it's the only place it's used for validation.
-const ChatInputSchema = z.object({
-  history: z.array(z.object({
-    role: z.enum(['user', 'model']),
-    content: z.array(z.object({ text: z.string() })),
-  })),
+const FormInputSchema = z.object({
+  history: z.array(z.string()), // History comes as stringified JSON from hidden inputs
   message: z.string().min(1, "Message cannot be empty."),
 });
 
@@ -22,13 +19,8 @@ export async function chatbotAction(
   prevState: ChatbotState,
   formData: FormData
 ): Promise<ChatbotState> {
-  const history = formData.getAll('history').map(h => {
-      const parsed = JSON.parse(h as string);
-      return { role: parsed.role, content: [{ text: parsed.text }]};
-  });
-  
-  const validatedFields = ChatInputSchema.safeParse({
-    history: history,
+  const validatedFields = FormInputSchema.safeParse({
+    history: formData.getAll('history'),
     message: formData.get('message'),
   });
 
@@ -40,9 +32,19 @@ export async function chatbotAction(
     };
   }
   
+  // The AI flow expects a specific structure. We construct it here.
+  const historyForAI = validatedFields.data.history.map(h => {
+      const parsed = JSON.parse(h);
+      return { role: parsed.role, content: [{ text: parsed.text }]};
+  });
+
+  const inputForAI = {
+    history: historyForAI,
+    message: validatedFields.data.message
+  };
+
   try {
-    // The `chat` function still expects the same input structure, but we don't need to import the type.
-    const result = await chat(validatedFields.data);
+    const result = await chat(inputForAI);
     return {
       response: result.response,
       error: null,

@@ -8,8 +8,18 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 
+// This schema now includes the isUser boolean for the prompt
+const ChatPromptInputSchema = z.object({
+  history: z.array(z.object({
+    isUser: z.boolean(),
+    text: z.string(),
+  })),
+  message: z.string().describe('The latest message from the user.'),
+});
+
+// The public-facing function still uses the original, simpler input structure
 const ChatInputSchema = z.object({
   history: z.array(z.object({
     role: z.enum(['user', 'model']),
@@ -26,12 +36,20 @@ type ChatOutput = z.infer<typeof ChatOutputSchema>;
 
 
 export async function chat(input: ChatInput): Promise<ChatOutput> {
-  return chatFlow(input);
+  // Map the input to the structure the prompt now expects
+  const promptInput = {
+    history: input.history.map(h => ({
+      isUser: h.role === 'user',
+      text: h.content[0].text,
+    })),
+    message: input.message,
+  };
+  return chatFlow(promptInput);
 }
 
 const prompt = ai.definePrompt({
   name: 'chatbotPrompt',
-  input: { schema: ChatInputSchema },
+  input: { schema: ChatPromptInputSchema }, // Use the internal schema with the boolean
   output: { schema: ChatOutputSchema },
   system: `You are a friendly and helpful AI assistant for the MediMind AI application.
 Your role is to assist users with their questions about the app's features or general health topics.
@@ -49,10 +67,10 @@ When asked about medical topics, ALWAYS include a disclaimer that you are an AI 
   prompt: `Based on the following conversation history and the new user message, provide a helpful response.
 
 {{#each history}}
-  {{#if (eq role 'user')}}
-User: {{{content.[0].text}}}
+  {{#if isUser}}
+User: {{{text}}}
   {{else}}
-Model: {{{content.[0].text}}}
+Model: {{{text}}}
   {{/if}}
 {{/each}}
 User: {{{message}}}
@@ -62,7 +80,7 @@ User: {{{message}}}
 const chatFlow = ai.defineFlow(
   {
     name: 'chatFlow',
-    inputSchema: ChatInputSchema,
+    inputSchema: ChatPromptInputSchema, // Flow now uses the internal schema
     outputSchema: ChatOutputSchema,
   },
   async (input) => {
