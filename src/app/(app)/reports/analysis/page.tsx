@@ -382,15 +382,14 @@ export default function ReportAnalysisPage() {
                          <Select value={selectedVoice} onValueChange={setSelectedVoice}>
                              <SelectTrigger className="w-[180px] h-9 text-xs">
                                  <Languages className="mr-2 h-4 w-4" />
-                                 <SelectValue placeholder="Select a Language" />
+                                 <SelectValue placeholder="Select a Voice" />
                              </SelectTrigger>
                              <SelectContent>
-                                 <SelectItem value="Algenib">English (USA)</SelectItem>
-                                 <SelectItem value="Antares">English (India)</SelectItem>
-                                 <SelectItem value="ta-IN-Standard-A">Tamil (India)</SelectItem>
-                                 <SelectItem value="te-IN-Standard-A">Telugu (India)</SelectItem>
-                                 <SelectItem value="kn-IN-Standard-A">Kannada (India)</SelectItem>
-                                 <SelectItem value="ml-IN-Standard-A">Malayalam (India)</SelectItem>
+                                 <SelectItem value="Algenib">English (US, F)</SelectItem>
+                                 <SelectItem value="Achernar">English (US, M)</SelectItem>
+                                 <SelectItem value="Antares">English (IN, M)</SelectItem>
+                                 <SelectItem value="Erinome">English (AU, F)</SelectItem>
+                                 <SelectItem value="Umbriel">English (UK, M)</SelectItem>
                              </SelectContent>
                          </Select>
                         <Button variant="outline" size="sm" onClick={handleListen} disabled={isGeneratingAudio}>
@@ -430,5 +429,3 @@ export default function ReportAnalysisPage() {
     </>
   );
 }
-
-    
