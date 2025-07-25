@@ -53,7 +53,7 @@ export default function ReportAnalysisPage() {
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
   const [audioError, setAudioError] = useState<string | null>(null);
-  const [selectedVoice, setSelectedVoice] = useState('Algenib'); // Default voice
+  const [selectedVoice, setSelectedVoice] = useState('en-US-Standard-C'); // Default voice for the new model
 
   // Effect to autoplay audio when src changes
   useEffect(() => {
@@ -385,11 +385,13 @@ export default function ReportAnalysisPage() {
                                  <SelectValue placeholder="Select a Voice" />
                              </SelectTrigger>
                              <SelectContent>
-                                 <SelectItem value="Algenib">English (US, F)</SelectItem>
-                                 <SelectItem value="Achernar">English (US, M)</SelectItem>
-                                 <SelectItem value="Antares">English (IN, M)</SelectItem>
-                                 <SelectItem value="Erinome">English (AU, F)</SelectItem>
-                                 <SelectItem value="Umbriel">English (UK, M)</SelectItem>
+                                <SelectItem value="en-US-Standard-C">English (US, F)</SelectItem>
+                                <SelectItem value="en-GB-Standard-A">English (UK, F)</SelectItem>
+                                <SelectItem value="en-IN-Standard-D">English (India, F)</SelectItem>
+                                <SelectItem value="ta-IN-Standard-A">Tamil (India, F)</SelectItem>
+                                <SelectItem value="te-IN-Standard-A">Telugu (India, F)</SelectItem>
+                                <SelectItem value="kn-IN-Standard-A">Kannada (India, F)</SelectItem>
+                                <SelectItem value="ml-IN-Standard-A">Malayalam (India, F)</SelectItem>
                              </SelectContent>
                          </Select>
                         <Button variant="outline" size="sm" onClick={handleListen} disabled={isGeneratingAudio}>
