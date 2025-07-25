@@ -65,7 +65,7 @@ const textToSpeechFlow = ai.defineFlow(
   async ({ text, voice }) => {
     const { media } = await ai.generate({
       // Switch to the model that supports a wider range of voices
-      model: googleAI.model('text-to-speech-1'), 
+      model: googleAI.model('tts-1'), 
       config: {
         responseModalities: ['AUDIO'],
         speechConfig: {
