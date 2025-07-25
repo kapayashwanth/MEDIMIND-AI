@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, ChangeEvent, useActionState, useRef } from 'react';
+import { useState, ChangeEvent, useActionState, useRef, useEffect } from 'react';
 import { useFormStatus } from 'react-dom';
 import Image from 'next/image';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -47,12 +47,23 @@ export default function ReportAnalysisPage() {
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [fileName, setFileName] = useState<string>('');
   const resultsRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
   
   // State for TTS
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
   const [audioError, setAudioError] = useState<string | null>(null);
   const [selectedVoice, setSelectedVoice] = useState('Algenib'); // Default voice
+
+  // Effect to autoplay audio when src changes
+  useEffect(() => {
+    if (audioSrc && audioRef.current) {
+        audioRef.current.play().catch(error => {
+            console.error("Audio autoplay failed. This can happen if the user hasn't interacted with the page yet.", error);
+            // The audio controls are still visible, so the user can manually play.
+        });
+    }
+  }, [audioSrc]);
 
   const handleListen = async () => {
     if (!state.data?.keyFindingsSummary) return;
@@ -376,6 +387,10 @@ export default function ReportAnalysisPage() {
                              <SelectContent>
                                  <SelectItem value="Algenib">English (USA)</SelectItem>
                                  <SelectItem value="Antares">English (India)</SelectItem>
+                                 <SelectItem value="ta-IN-Standard-A">Tamil (India)</SelectItem>
+                                 <SelectItem value="te-IN-Standard-A">Telugu (India)</SelectItem>
+                                 <SelectItem value="kn-IN-Standard-A">Kannada (India)</SelectItem>
+                                 <SelectItem value="ml-IN-Standard-A">Malayalam (India)</SelectItem>
                              </SelectContent>
                          </Select>
                         <Button variant="outline" size="sm" onClick={handleListen} disabled={isGeneratingAudio}>
@@ -388,7 +403,7 @@ export default function ReportAnalysisPage() {
                  {audioError && <p className="text-sm text-destructive mt-2">{audioError}</p>}
                  {audioSrc && (
                     <div className="mt-4">
-                        <audio controls src={audioSrc} className="w-full">
+                        <audio controls src={audioSrc} ref={audioRef} className="w-full">
                             Your browser does not support the audio element.
                         </audio>
                     </div>
@@ -415,3 +430,5 @@ export default function ReportAnalysisPage() {
     </>
   );
 }
+
+    
