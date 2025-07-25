@@ -53,7 +53,7 @@ export default function ReportAnalysisPage() {
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
   const [audioError, setAudioError] = useState<string | null>(null);
-  const [selectedVoice, setSelectedVoice] = useState('Algenib'); // Default voice for flash model
+  const [selectedVoice, setSelectedVoice] = useState('en-IN-Standard-A'); // Default voice for tts-1 model
 
   // Effect to autoplay audio when src changes
   useEffect(() => {
@@ -385,12 +385,18 @@ export default function ReportAnalysisPage() {
                                  <SelectValue placeholder="Select a Voice" />
                              </SelectTrigger>
                              <SelectContent>
-                                <SelectItem value="Algenib">Algenib (F)</SelectItem>
-                                <SelectItem value="Achernar">Achernar (M)</SelectItem>
-                                <SelectItem value="Umbriel">Umbriel (M)</SelectItem>
-                                <SelectItem value="Leda">Leda (F)</SelectItem>
-                                <SelectItem value="Puck">Puck (M)</SelectItem>
-                                <SelectItem value="zubenelgenubi">Zubenelgenubi (M)</SelectItem>
+                                <SelectItem value="en-IN-Standard-A">English (India, F)</SelectItem>
+                                <SelectItem value="en-IN-Standard-B">English (India, M)</SelectItem>
+                                <SelectItem value="en-US-Standard-C">English (US, F)</SelectItem>
+                                <SelectItem value="en-US-Standard-E">English (US, F, Wavenet)</SelectItem>
+                                <SelectItem value="ta-IN-Standard-A">Tamil (India, F)</SelectItem>
+                                <SelectItem value="ta-IN-Standard-B">Tamil (India, M)</SelectItem>
+                                <SelectItem value="te-IN-Standard-A">Telugu (India, F)</SelectItem>
+                                <SelectItem value="te-IN-Standard-B">Telugu (India, M)</SelectItem>
+                                <SelectItem value="kn-IN-Standard-A">Kannada (India, F)</SelectItem>
+                                <SelectItem value="kn-IN-Standard-B">Kannada (India, M)</SelectItem>
+                                <SelectItem value="ml-IN-Standard-A">Malayalam (India, F)</SelectItem>
+                                <SelectItem value="ml-IN-Standard-B">Malayalam (India, M)</SelectItem>
                              </SelectContent>
                          </Select>
                         <Button variant="outline" size="sm" onClick={handleListen} disabled={isGeneratingAudio}>
