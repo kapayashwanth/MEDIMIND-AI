@@ -53,7 +53,7 @@ export default function ReportAnalysisPage() {
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
   const [audioError, setAudioError] = useState<string | null>(null);
-  const [selectedVoice, setSelectedVoice] = useState('en-US-Standard-C'); // Default voice for the new model
+  const [selectedVoice, setSelectedVoice] = useState('Algenib'); // Default voice for flash model
 
   // Effect to autoplay audio when src changes
   useEffect(() => {
@@ -385,13 +385,12 @@ export default function ReportAnalysisPage() {
                                  <SelectValue placeholder="Select a Voice" />
                              </SelectTrigger>
                              <SelectContent>
-                                <SelectItem value="en-US-Standard-C">English (US, F)</SelectItem>
-                                <SelectItem value="en-GB-Standard-A">English (UK, F)</SelectItem>
-                                <SelectItem value="en-IN-Standard-D">English (India, F)</SelectItem>
-                                <SelectItem value="ta-IN-Standard-A">Tamil (India, F)</SelectItem>
-                                <SelectItem value="te-IN-Standard-A">Telugu (India, F)</SelectItem>
-                                <SelectItem value="kn-IN-Standard-A">Kannada (India, F)</SelectItem>
-                                <SelectItem value="ml-IN-Standard-A">Malayalam (India, F)</SelectItem>
+                                <SelectItem value="Algenib">Algenib (F)</SelectItem>
+                                <SelectItem value="Achernar">Achernar (M)</SelectItem>
+                                <SelectItem value="Umbriel">Umbriel (M)</SelectItem>
+                                <SelectItem value="Leda">Leda (F)</SelectItem>
+                                <SelectItem value="Puck">Puck (M)</SelectItem>
+                                <SelectItem value="zubenelgenubi">Zubenelgenubi (M)</SelectItem>
                              </SelectContent>
                          </Select>
                         <Button variant="outline" size="sm" onClick={handleListen} disabled={isGeneratingAudio}>
