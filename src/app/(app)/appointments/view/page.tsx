@@ -1,43 +1,60 @@
 
+'use client';
+
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, User, Hospital, Stethoscope } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-const mockAppointments = [
-  {
-    id: 1,
-    doctor: 'Dr. Sarah Johnson',
-    specialty: 'Cardiology',
-    hospital: 'Valley General Hospital',
-    date: '2024-08-15',
-    time: '10:30 AM',
-    status: 'Upcoming'
-  },
-  {
-    id: 2,
-    doctor: 'Dr. Michael Lee',
-    specialty: 'Dermatology',
-    hospital: 'City Central Medical Center',
-    date: '2024-07-20',
-    time: '02:00 PM',
-    status: 'Completed'
-  },
-  {
-    id: 3,
-    doctor: 'Dr. Emily White',
-    specialty: 'Neurology',
-    hospital: 'Riverbend Clinic',
-    date: '2024-06-10',
-    time: '09:00 AM',
-    status: 'Completed'
-  },
-];
+interface Appointment {
+  id: number;
+  doctor: string;
+  specialty: string;
+  hospital: string;
+  date: string;
+  time: string;
+  status: 'Upcoming' | 'Completed';
+}
+
+const getDoctorForSpecialty = (specialty: string): string => {
+    const doctors: { [key: string]: string } = {
+        'Cardiology': 'Dr. Sarah Johnson',
+        'Dermatology': 'Dr. Michael Lee',
+        'Neurology': 'Dr. Emily White',
+        'Orthopedics': 'Dr. James Brown',
+        'Pediatrics': 'Dr. Linda Davis'
+    };
+    return doctors[specialty] || 'Dr. Placeholder';
+}
 
 export default function ViewAppointmentsPage() {
-  const upcomingAppointments = mockAppointments.filter(a => a.status === 'Upcoming');
-  const pastAppointments = mockAppointments.filter(a => a.status === 'Completed');
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
 
-  const AppointmentCard = ({ appointment }: { appointment: typeof mockAppointments[0] }) => (
+  useEffect(() => {
+    // This code runs only on the client, after the component has mounted.
+    const storedAppointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+    
+    const processedAppointments = storedAppointments.map((app: any) => {
+        const appointmentDate = new Date(app.date);
+        const today = new Date();
+        // Set time to 00:00:00 to compare dates only
+        appointmentDate.setHours(0,0,0,0);
+        today.setHours(0,0,0,0);
+
+        return {
+            ...app,
+            doctor: getDoctorForSpecialty(app.specialty),
+            status: appointmentDate < today ? 'Completed' : 'Upcoming'
+        };
+    });
+
+    setAppointments(processedAppointments);
+  }, []);
+
+  const upcomingAppointments = appointments.filter(a => a.status === 'Upcoming').sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const pastAppointments = appointments.filter(a => a.status === 'Completed').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  const AppointmentCard = ({ appointment }: { appointment: Appointment }) => (
     <Card className="shadow-md hover:shadow-lg transition-shadow">
       <CardHeader>
         <CardTitle className="font-headline text-xl">{appointment.doctor}</CardTitle>
