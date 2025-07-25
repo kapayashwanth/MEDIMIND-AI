@@ -12,11 +12,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { analyzeReportAction, AnalyzeReportState } from '@/lib/actions/analyzeReportAction';
+import { textToSpeechAction } from '@/lib/actions/textToSpeechAction';
 import type { TestResultItem } from '@/ai/flows/analyze-medical-report';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { 
     FileUp, AlertCircle, CheckCircle2, Download, User, Users, FileText as ReportIcon,
-    AlertOctagon, Activity, Info, ListChecks, ArrowDownCircle, ArrowUpCircle, CheckCircle, FileText
+    AlertOctagon, Activity, Info, ListChecks, ArrowDownCircle, ArrowUpCircle, CheckCircle, FileText,
+    Volume2, Languages
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -45,6 +47,33 @@ export default function ReportAnalysisPage() {
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [fileName, setFileName] = useState<string>('');
   const resultsRef = useRef<HTMLDivElement>(null);
+  
+  // State for TTS
+  const [audioSrc, setAudioSrc] = useState<string | null>(null);
+  const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
+  const [audioError, setAudioError] = useState<string | null>(null);
+  const [selectedVoice, setSelectedVoice] = useState('Algenib'); // Default voice
+
+  const handleListen = async () => {
+    if (!state.data?.keyFindingsSummary) return;
+    
+    setIsGeneratingAudio(true);
+    setAudioError(null);
+    setAudioSrc(null);
+
+    const formData = new FormData();
+    formData.append('text', state.data.keyFindingsSummary);
+    formData.append('voice', selectedVoice);
+
+    const result = await textToSpeechAction(formData);
+
+    if (result.audioDataUri) {
+      setAudioSrc(result.audioDataUri);
+    } else {
+      setAudioError(result.error || 'Failed to generate audio.');
+    }
+    setIsGeneratingAudio(false);
+  };
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -334,10 +363,36 @@ export default function ReportAnalysisPage() {
               )}
             
               <div>
-                <h3 className="font-semibold text-lg mb-2 flex items-center">
-                   <ReportIcon className="mr-2 h-5 w-5 text-primary" /> Key Findings Summary
-                </h3>
+                 <div className="flex justify-between items-center mb-2">
+                    <h3 className="font-semibold text-lg flex items-center">
+                       <ReportIcon className="mr-2 h-5 w-5 text-primary" /> Key Findings Summary
+                    </h3>
+                     <div className="flex items-center gap-2">
+                         <Select value={selectedVoice} onValueChange={setSelectedVoice}>
+                             <SelectTrigger className="w-[180px] h-9 text-xs">
+                                 <Languages className="mr-2 h-4 w-4" />
+                                 <SelectValue placeholder="Select a Language" />
+                             </SelectTrigger>
+                             <SelectContent>
+                                 <SelectItem value="Algenib">English (USA)</SelectItem>
+                                 <SelectItem value="Antares">English (India)</SelectItem>
+                             </SelectContent>
+                         </Select>
+                        <Button variant="outline" size="sm" onClick={handleListen} disabled={isGeneratingAudio}>
+                            {isGeneratingAudio ? <LoadingSpinner size="sm" /> : <Volume2 className="mr-2 h-4 w-4" />}
+                            Listen
+                        </Button>
+                     </div>
+                </div>
                 <p className="text-sm text-foreground whitespace-pre-wrap p-3 bg-muted rounded-md">{state.data.keyFindingsSummary}</p>
+                 {audioError && <p className="text-sm text-destructive mt-2">{audioError}</p>}
+                 {audioSrc && (
+                    <div className="mt-4">
+                        <audio controls src={audioSrc} className="w-full">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+                )}
               </div>
 
               <div>
