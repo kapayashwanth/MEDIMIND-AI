@@ -3,7 +3,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { FileScan, ScrollText, Pill, BarChart3, CalendarPlus, Search } from 'lucide-react';
+import { FileScan, ScrollText, Pill, BarChart3, CalendarPlus, Search, CalendarCheck, BellRing } from 'lucide-react';
 
 export default function DashboardPage() {
   return (
@@ -17,7 +17,7 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
             <CardHeader>
               <div className="flex items-center gap-3 mb-2">
@@ -93,7 +93,7 @@ export default function DashboardPage() {
                 <CardTitle className="font-headline">Book Appointment</CardTitle>
               </div>
               <CardDescription>
-                Schedule a visit with a doctor from various hospitals.
+                Schedule a new visit with a doctor from various hospitals.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -102,6 +102,41 @@ export default function DashboardPage() {
               </Link>
             </CardContent>
           </Card>
+
+           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardHeader>
+              <div className="flex items-center gap-3 mb-2">
+                <CalendarCheck className="h-8 w-8 text-primary" />
+                <CardTitle className="font-headline">View Appointments</CardTitle>
+              </div>
+              <CardDescription>
+                Check your upcoming and past appointment schedules.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link href="/appointments/view" passHref>
+                <Button className="w-full" variant="default">View All</Button>
+              </Link>
+            </CardContent>
+          </Card>
+          
+          <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardHeader>
+              <div className="flex items-center gap-3 mb-2">
+                <BellRing className="h-8 w-8 text-primary" />
+                <CardTitle className="font-headline">Medicine Reminders</CardTitle>
+              </div>
+              <CardDescription>
+                Set up reminders for taking your medications on time.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link href="/medicines/reminder" passHref>
+                <Button className="w-full" variant="default">Set Reminder</Button>
+              </Link>
+            </CardContent>
+          </Card>
+
 
           <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
             <CardHeader>

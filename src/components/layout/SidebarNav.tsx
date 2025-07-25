@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, FileScan, ScrollText, Pill, CalendarPlus, Search } from 'lucide-react';
+import { LayoutDashboard, FileScan, ScrollText, Pill, CalendarPlus, Search, CalendarCheck, BellRing } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   SidebarMenu,
@@ -18,7 +18,9 @@ const navItems = [
   { href: '/prescriptions/interpret', label: 'Prescription Interpretation', icon: ScrollText },
   { href: '/medicines/search', label: 'Medicine Search', icon: Pill },
   { href: '/medicines/by-disease', label: 'Medicine by Disease', icon: Search },
+  { href: '/medicines/reminder', label: 'Medicine Reminders', icon: BellRing },
   { href: '/appointments/book', label: 'Book Appointment', icon: CalendarPlus },
+  { href: '/appointments/view', label: 'View Appointments', icon: CalendarCheck },
 ];
 
 export function SidebarNav() {
